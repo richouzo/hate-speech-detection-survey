@@ -14,3 +14,4 @@ sentencepiece
 onnxruntime
 seqeval
 datasets
+nltk
