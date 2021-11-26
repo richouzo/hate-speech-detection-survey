@@ -1,0 +1,17 @@
+numpy
+requests
+tqdm>=4.47.0
+regex
+transformers>=4.2.0
+scipy
+scikit-learn
+tensorboardx
+pandas
+tokenizers
+matplotlib
+wandb
+sentencepiece
+onnxruntime
+seqeval
+datasets
+nltk
