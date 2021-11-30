@@ -1,0 +1,11 @@
+numpy
+tqdm>=4.47.0
+regex
+scipy
+scikit-learn
+pandas
+matplotlib
+seaborn
+nltk
+spacy
+torchtext
