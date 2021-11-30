@@ -7,8 +7,6 @@ import copy
 import torch
 
 from sklearn.metrics import f1_score
-from torch import optim
-import torch.nn as nn
 
 from utils import EarlyStopping
 
