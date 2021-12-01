@@ -26,18 +26,28 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--data", help="unprocessed OLID dataset")
 parser.add_argument("--model", help="model to use. Choices are: BasicLSTM, ...", default='BasicLSTM')
 parser.add_argument("--batch_size", help="batch size", type=int, default=128)
-parser.add_argument("--device", default='cuda' , help="cpu or cuda for gpu")
+parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
+parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bceloss')
 parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
 parser.add_argument("--do_save", default=1, help="1 for saving stats and figures, else 0", type=int)
+parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
 
 args = parser.parse_args()
 
 olid_file = args.data
 batch_size = args.batch_size
-device = args.device
+lr = args.lr
+loss_criterion = args.loss_criterion
 spacy_en = spacy.load("en_core_web_sm")
 model_type = args.model
 do_save = args.do_save
+print(args.device)
+if args.device in ['cuda', 'cpu']:
+    device = args.device
+else:
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+print("Device:", device)
 
 # preprocessing of the tweets
 tweets, classes = format_file(olid_file)
@@ -60,25 +70,32 @@ print("vocabulary built..")
 train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device)
 # train_iterator, test_iterator = create_iterators(train_data, test_data, batch_size, device)
 test_iterator = val_iterator ### To remove
-print("iterators created..")
+print("dataloaders created..")
 
 
 #instanciate model (all models need to be added here)
 if model_type == 'MORE MODELS NAMES':
-    model = 0 #other models here
+    model = None #other models here
 elif model_type == 'BasicLSTM':
-    model = BasicLSTM.BasicLSTM(dim_emb = 300, num_words = ENGLISH.vocab.__len__(), hidden_dim = 128, num_layers = 2, output_dim = 1)
-    if device == 'cuda':
-       model.cuda()
+    model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=ENGLISH.vocab.__len__(), 
+                                hidden_dim=128, num_layers=2, output_dim=1)
 else:
     model = None
 
+model.to(device)
 
-print("model loaded ..")
-print('training starts')
+print("Model {} loaded on {}".format(model_type, device))
 
-criterion = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+if loss_criterion == 'bceloss':
+    criterion = nn.BCELoss()
+elif loss_criterion == 'crossentropy':
+    criterion = nn.CrossEntropyLoss()
+else: # Default to BCELoss
+    criterion = nn.BCELoss()
+
+print('Loss used: {}'.format(criterion))
+
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
 dataloaders = {}
 dataloaders['train'] = train_iterator
