@@ -25,19 +25,17 @@ def load_model(saved_model_path, device):
 
     return model
 
-
-def save_model(model, hist, trained_models_path, model_type, do_save):
+def save_model(model, hist, trained_models_path, model_type, do_save, do_print=False):
     """
     Save the trained model.
     """
     if do_save:
         current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        saved_model_path = f"{trained_models_path}{model_type}_{current_time}_trained_valAcc={hist['best_val_acc']}.pth"
+        saved_model_path = f"{trained_models_path}{model_type}_{current_time}_trained_testAcc={hist['test_acc']}.pth"
         torch.save(model, saved_model_path)
-        print(f"Model saved at {saved_model_path}")
+        if do_print: print(f"Model saved at {saved_model_path}")
 
-
-def plot_training(hist, figures_path, model_type, do_save, do_plot=False):
+def plot_training(hist, figures_path, model_type, do_save, do_plot=False, do_print=False):
     """
     Plot the training and validation loss/accuracy.
     """
@@ -52,11 +50,10 @@ def plot_training(hist, figures_path, model_type, do_save, do_plot=False):
     ax[1].legend()
     if do_save:
         current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        save_graph_path = f"{figures_path}{model_type}_losses&acc_{current_time}_valAcc={hist['best_val_acc']}.png"
+        save_graph_path = f"{figures_path}{model_type}_losses&acc_{current_time}_testAcc={hist['test_acc']}.png"
         plt.savefig(save_graph_path)
-        print(f"Training graph saved at {save_graph_path}")
+        if do_print: print(f"Training graph saved at {save_graph_path}")
     if do_plot: plt.show()
-
 
 def classif_report(hist, list_names=[]):
     """
@@ -76,8 +73,7 @@ def classif_report(hist, list_names=[]):
     target_names = list_names if list_names else [f'class {i}' for i in range(nb_classes)]
     print(classification_report(y_true, y_pred, target_names=target_names))
 
-
-def plot_cm(hist, figures_path, model_type, do_save, do_plot=False):
+def plot_cm(hist, figures_path, model_type, do_save, do_plot=False, do_print=False):
     """
     Plot the confusion matrix after testing.
     """
@@ -86,7 +82,7 @@ def plot_cm(hist, figures_path, model_type, do_save, do_plot=False):
 
     nb_classes = len(set(y_true))
     current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    cm_path = f"{figures_path}{model_type}_CM_{current_time}_valAcc={hist['best_val_acc']}.png"
+    cm_path = f"{figures_path}{model_type}_CM_{current_time}_testAcc={hist['test_acc']}.png"
 
     cm = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cm, index = [i for i in range(nb_classes)], 
@@ -98,9 +94,8 @@ def plot_cm(hist, figures_path, model_type, do_save, do_plot=False):
 
     if do_save:
         plt.savefig(cm_path)
-        print(f"Confusion Matrix saved at {cm_path}")
+        if do_print: print(f"Confusion Matrix saved at {cm_path}")
     if do_plot: plt.show()
-
 
 # From https://github.com/Bjarten/early-stopping-pytorch
 class EarlyStopping:

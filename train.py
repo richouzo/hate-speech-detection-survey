@@ -12,13 +12,13 @@ from utils import EarlyStopping
 
 
 def train_model(model, criterion, optimizer, dataloaders, history_training, 
-                scheduler=None, num_epochs=10, patience_es=5):
+                scheduler=None, num_epochs=10, patience_es=5, training_remaining=1):
     '''
     Main training function
     '''
-    print("\n\n**TRAINING**\n")
+    print("\n**TRAINING**\n")
     # Init Early stoping class
-    early_stopping = EarlyStopping(patience=patience_es, verbose=True, delta=0)
+    early_stopping = EarlyStopping(patience=patience_es, verbose=False, delta=0)
 
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -26,9 +26,10 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
     history_training['epochs'] = np.arange(num_epochs)
 
+    # Iterate over epochs.
     for epoch in range(num_epochs):
         lasttime = time.time()
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('Epoch {}/{} | Trainings remaining: {}'.format(epoch, num_epochs - 1, training_remaining))
         print('-' * 10)
 
         # Each epoch has a training and validation phase
@@ -116,7 +117,6 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
     model.load_state_dict(best_model_wts)
 
     return (model, history_training)
-
 
 def test_model(model, history_training, criterion, dataloaders):
     """
