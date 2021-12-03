@@ -30,7 +30,7 @@ def save_model(model, hist, trained_models_path, model_type, do_save, do_print=F
     Save the trained model.
     """
     if do_save:
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        current_time = hist['current_time']
         saved_model_path = f"{trained_models_path}{model_type}_{current_time}_trained_testAcc={hist['test_acc']}.pth"
         torch.save(model, saved_model_path)
         if do_print: print(f"Model saved at {saved_model_path}")
@@ -49,7 +49,7 @@ def plot_training(hist, figures_path, model_type, do_save, do_plot=False, do_pri
     ax[0].legend()
     ax[1].legend()
     if do_save:
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        current_time = hist['current_time']
         save_graph_path = f"{figures_path}{model_type}_losses&acc_{current_time}_testAcc={hist['test_acc']}.png"
         plt.savefig(save_graph_path)
         if do_print: print(f"Training graph saved at {save_graph_path}")
@@ -81,7 +81,7 @@ def plot_cm(hist, figures_path, model_type, do_save, do_plot=False, do_print=Fal
     y_true = [y for y in hist['y_true']]
 
     nb_classes = len(set(y_true))
-    current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    current_time = hist['current_time']
     cm_path = f"{figures_path}{model_type}_CM_{current_time}_testAcc={hist['test_acc']}.png"
 
     cm = confusion_matrix(y_true, y_pred)

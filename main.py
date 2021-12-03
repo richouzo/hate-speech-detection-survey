@@ -1,6 +1,7 @@
 import tqdm
 import argparse
 import numpy as np
+import datetime
 
 import spacy
 import pandas as pd
@@ -27,7 +28,7 @@ spacy_en = spacy.load("en_core_web_sm")
 def tokenizer(text):
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
-def get_dataloaders(training_data, testset_data, test_labels_data, batch_size, device):
+def get_datasets(training_data, testset_data, test_labels_data):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
     tweets_test, y_test = format_test_file(testset_data, test_labels_data)
@@ -42,8 +43,11 @@ def get_dataloaders(training_data, testset_data, test_labels_data, batch_size, d
     print("fields and dataset object created")
     ENGLISH.build_vocab(train_data, max_size=10000, min_freq=2)
     LABEL.build_vocab(train_data)
-
     print("vocabulary built..")
+
+    return (ENGLISH, train_data, val_data, test_data)
+
+def get_dataloaders(train_data, val_data, test_data, batch_size, device):
     train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)
     _, test_iterator = create_iterators(train_data, test_data, batch_size, device, shuffle=False)
     print("dataloaders created..")
@@ -53,10 +57,20 @@ def get_dataloaders(training_data, testset_data, test_labels_data, batch_size, d
     dataloaders['val'] = val_iterator
     dataloaders['test'] = test_iterator
 
-    return (ENGLISH, dataloaders)
+    return dataloaders
 
 def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=False):
+         epochs, patience_es, do_save, device, do_print=False, training_remaining=1):
+
+    print()
+    print('model_type:', model_type)
+    print('optimizer_type:', optimizer_type)
+    print('loss_criterion:', loss_criterion)
+    print('learning rate:', lr)
+    print('epochs:', epochs)
+    print('patience_es:', patience_es)
+    print()
+
     #instanciate model (all models need to be added here)
     if model_type == 'MORE MODELS NAMES':
         model = None #other models here
@@ -99,32 +113,40 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
     ### Training phase ###
     model, history_training = train_model(model, criterion, optimizer, 
                                           dataloaders, history_training, 
-                                          num_epochs=epochs, patience_es=patience_es)
+                                          num_epochs=epochs, patience_es=patience_es, 
+                                          training_remaining=training_remaining)
 
 
     ### Testing ###
     history_training = test_model(model=model, history_training=history_training, criterion=criterion, 
                                   dataloaders=dataloaders)
 
+    current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    history_training['current_time'] = current_time
 
     ### Save the model ###
-    save_model(model=model, hist=history_training, 
-               trained_models_path=SAVED_MODELS_PATH, model_type=model_type, 
+    save_model(model=model, hist=history_training,
+               trained_models_path=SAVED_MODELS_PATH, 
+               model_type=model_type, 
                do_save=do_save, do_print=do_print)
 
 
     ### Plot the losses ###
     plot_training(hist=history_training, figures_path=FIGURES_PATH, 
-                  model_type=model_type, do_save=do_save, do_print=do_print)
+                  model_type=model_type, 
+                  do_save=do_save, do_print=do_print)
 
 
     ### Plotting the CM ###
     plot_cm(hist=history_training, figures_path=FIGURES_PATH, 
-            model_type=model_type, do_save=do_save, do_print=do_print)
+            model_type=model_type, 
+            do_save=do_save, do_print=do_print)
 
 
     ### Give the classification report ###
     if do_print: classif_report(hist=history_training)
+
+    return history_training
 
 
 if __name__ == '__main__':
@@ -166,7 +188,9 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    ENGLISH, dataloaders = get_dataloaders(training_data, testset_data, test_labels_data, batch_size, device)
+    ENGLISH, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+
+    dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
     main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=True)
