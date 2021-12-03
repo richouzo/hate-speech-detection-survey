@@ -1,4 +1,3 @@
-import tqdm
 import argparse
 import datetime
 

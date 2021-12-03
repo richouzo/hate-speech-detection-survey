@@ -1,6 +1,5 @@
 import tqdm
 import argparse
-import numpy as np
 import datetime
 
 import spacy
@@ -8,20 +7,14 @@ import pandas as pd
 from sklearn.metrics import f1_score
 
 import torch
-from torchtext.legacy.data import Field, LabelField, TabularDataset, BucketIterator
-from torchtext.vocab import build_vocab_from_iterator
-from torch.utils.data import Dataset
 
 from torch import optim
 import torch.nn as nn
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from preprocess_utils import *
 from train import train_model, test_model
-from models import BasicLSTM, BiLSTM
 
-from utils import save_model, plot_training, plot_cm, classif_report
-
+from utils import load_model, save_model, plot_training, plot_cm, classif_report
 
 spacy_en = spacy.load("en_core_web_sm")
 
@@ -61,7 +54,6 @@ def get_dataloaders(train_data, val_data, test_data, batch_size, device):
 
 def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=False, training_remaining=1):
-
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -71,19 +63,8 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
     print('patience_es:', patience_es)
     print()
 
-    #instanciate model (all models need to be added here)
-    if model_type == 'MORE MODELS NAMES':
-        model = None #other models here
-    elif model_type == 'BasicLSTM':
-        model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=ENGLISH.vocab.__len__(), 
-                                    hidden_dim=128, num_layers=2, output_dim=1)
-    elif model_type == 'BiLSTM':
-        model = BiLSTM.BiLSTM(dim_emb=300, num_words=ENGLISH.vocab.__len__(), 
-                                    hidden_dim=128, num_layers=2, output_dim=1)
-    else:
-        model = None
-
-    model.to(device)
+    # Instanciate model 
+    model = load_model(model_type, ENGLISH, device)
 
     print("Model {} loaded on {}".format(model_type, device))
 

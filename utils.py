@@ -13,14 +13,30 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
+from models import BasicLSTM, BiLSTM
 
-def load_model(saved_model_path, device):
+def load_model(model_type, field, device):
     """
     Load and return model.
     """
-    model = torch.load(saved_model_path)
-    print(f"{saved_model_path} loaded.")
+    if model_type == 'BasicLSTM':
+        model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
+                                    hidden_dim=128, num_layers=2, output_dim=1)
+    elif model_type == 'BiLSTM':
+        model = BiLSTM.BiLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
+                                    hidden_dim=128, num_layers=2, output_dim=1)
+    else:
+        model = None
+    model.to(device)
 
+    return model
+
+def load_trained_model(model, saved_model_path, device):
+    """
+    Load and return trained model. Initialize the model first with load_model().
+    """
+    model.load_state_dict(torch.load(saved_model_path), map_location=device)
+    print(f"{saved_model_path} loaded.")
     model.to(device)
 
     return model
@@ -32,7 +48,7 @@ def save_model(model, hist, trained_models_path, model_type, do_save, do_print=F
     if do_save:
         current_time = hist['current_time']
         saved_model_path = f"{trained_models_path}{model_type}_{current_time}_trained_testAcc={hist['test_acc']}.pth"
-        torch.save(model, saved_model_path)
+        torch.save(model.state_dict(), saved_model_path)
         if do_print: print(f"Model saved at {saved_model_path}")
 
 def plot_training(hist, figures_path, model_type, do_save, do_plot=False, do_print=False):

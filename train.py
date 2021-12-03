@@ -10,7 +10,6 @@ from sklearn.metrics import f1_score
 
 from utils import EarlyStopping
 
-
 def train_model(model, criterion, optimizer, dataloaders, history_training, 
                 scheduler=None, num_epochs=10, patience_es=5, training_remaining=1):
     '''
