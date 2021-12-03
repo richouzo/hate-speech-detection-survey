@@ -12,13 +12,12 @@ import yaml
 from preprocess_utils import get_datasets, get_dataloaders
 from main import main
 
-def get_gridsearch_config(config_path, params_name):
+def get_gridsearch_config(config_path):
     with open(config_path, "r") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     hyperparameters = config['hyperparameters']
     print('hyperparameters keys', list(hyperparameters.keys()))
-    assert set(hyperparameters.keys()) == set(params_name)
 
     all_config_list = []
     for param_name in hyperparameters.keys():
@@ -27,15 +26,8 @@ def get_gridsearch_config(config_path, params_name):
     return all_config_list
 
 def gridsearch(config_path, training_data, testset_data, test_labels_data, do_save, device):
-    params_name = ['model_type', 
-                   'optimizer_type', 
-                   'loss_criterion', 
-                   'lr', 
-                   'epochs', 
-                   'batch_size', 
-                   'patience_es']
 
-    all_config_list = get_gridsearch_config(config_path, params_name)
+    all_config_list = get_gridsearch_config(config_path)
 
     ENGLISH, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
 
