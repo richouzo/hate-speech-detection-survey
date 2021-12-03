@@ -10,6 +10,7 @@ import itertools
 import yaml
 
 from preprocess_utils import get_datasets, get_dataloaders
+from utils import GRIDSEARCH_CSV
 from main import main
 
 def get_gridsearch_config(config_path):
@@ -36,7 +37,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
 
     # Save gridsearch training to csv
     current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    csv_path = 'gridsearch_results/results_{}.csv'.format(current_time)
+    csv_path = GRIDSEARCH_CSV+'results_{}.csv'.format(current_time)
     results_dict = {'model_type': [], 
                     'optimizer_type': [], 
                     'loss_criterion': [], 

@@ -15,7 +15,6 @@ from preprocess_utils import get_datasets, get_dataloaders
 from train import train_model, test_model
 
 from utils import load_model, save_model, plot_training, plot_cm, classif_report
-from utils import SAVED_MODELS_PATH, FIGURES_PATH
 
 def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc'):
@@ -82,19 +81,18 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
 
     ### Save the model ###
     save_model(model=model, hist=history_training,
-               trained_models_path=SAVED_MODELS_PATH, 
                model_type=model_type, 
                do_save=do_save, do_print=do_print)
 
 
     ### Plot the losses ###
-    plot_training(hist=history_training, figures_path=FIGURES_PATH, 
+    plot_training(hist=history_training, 
                   model_type=model_type, 
                   do_save=do_save, do_print=do_print)
 
 
     ### Plotting the CM ###
-    plot_cm(hist=history_training, figures_path=FIGURES_PATH, 
+    plot_cm(hist=history_training, 
             model_type=model_type, 
             do_save=do_save, do_print=do_print)
 

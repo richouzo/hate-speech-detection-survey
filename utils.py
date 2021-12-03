@@ -17,6 +17,7 @@ from models import BasicLSTM, BiLSTM
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
+GRIDSEARCH_CSV = "gridsearch_results/"
 
 def load_model(model_type, field, device):
     """
@@ -44,17 +45,17 @@ def load_trained_model(model, saved_model_path, device):
 
     return model
 
-def save_model(model, hist, trained_models_path, model_type, do_save, do_print=False):
+def save_model(model, hist, model_type, do_save, do_print=False):
     """
     Save the trained model.
     """
     if do_save:
         end_time = hist['end_time']
-        saved_model_path = f"{trained_models_path}{model_type}_{end_time}_trained_testAcc={hist['test_acc']}.pth"
+        saved_model_path = f"{SAVED_MODELS_PATH}{model_type}_{end_time}_trained_testAcc={hist['test_acc']}.pth"
         torch.save(model.state_dict(), saved_model_path)
         if do_print: print(f"Model saved at {saved_model_path}")
 
-def plot_training(hist, figures_path, model_type, do_save, do_plot=False, do_print=False):
+def plot_training(hist, model_type, do_save, do_plot=False, do_print=False):
     """
     Plot the training and validation loss/accuracy.
     """
@@ -69,7 +70,7 @@ def plot_training(hist, figures_path, model_type, do_save, do_plot=False, do_pri
     ax[1].legend()
     if do_save:
         end_time = hist['end_time']
-        save_graph_path = f"{figures_path}{model_type}_losses&acc_{end_time}_testAcc={hist['test_acc']}.png"
+        save_graph_path = f"{FIGURES_PATH}{model_type}_losses&acc_{end_time}_testAcc={hist['test_acc']}.png"
         plt.savefig(save_graph_path)
         if do_print: print(f"Training graph saved at {save_graph_path}")
     if do_plot: plt.show()
@@ -92,7 +93,7 @@ def classif_report(hist, list_names=[]):
     target_names = list_names if list_names else [f'class {i}' for i in range(nb_classes)]
     print(classification_report(y_true, y_pred, target_names=target_names))
 
-def plot_cm(hist, figures_path, model_type, do_save, do_plot=False, do_print=False):
+def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
     """
     Plot the confusion matrix after testing.
     """
@@ -101,7 +102,7 @@ def plot_cm(hist, figures_path, model_type, do_save, do_plot=False, do_print=Fal
 
     nb_classes = len(set(y_true))
     end_time = hist['end_time']
-    cm_path = f"{figures_path}{model_type}_CM_{end_time}_testAcc={hist['test_acc']}.png"
+    cm_path = f"{FIGURES_PATH}{model_type}_CM_{end_time}_testAcc={hist['test_acc']}.png"
 
     cm = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cm, index = [i for i in range(nb_classes)], 
