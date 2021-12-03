@@ -55,7 +55,7 @@ def get_dataloaders(training_data, testset_data, test_labels_data, batch_size, d
 
     return (ENGLISH, dataloaders)
 
-def main(dataloaders, ENGLISH, model_type, loss_criterion, lr, 
+def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=False):
     #instanciate model (all models need to be added here)
     if model_type == 'MORE MODELS NAMES':
@@ -79,7 +79,14 @@ def main(dataloaders, ENGLISH, model_type, loss_criterion, lr,
 
     print('Loss used: {}'.format(criterion))
 
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    if optimizer_type == 'adam':
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+    elif optimizer_type == 'sgd':
+        optimizer = optim.SGD(model.parameters(), lr=lr)
+    else: # Default to Adam
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    print('Optimizer used: {}'.format(optimizer))
 
 
     ### Define dictionary for training info ###
@@ -128,6 +135,7 @@ if __name__ == '__main__':
     parser.add_argument("--model", help="model to use. Choices are: BasicLSTM, ...", default='BasicLSTM')
     parser.add_argument("--batch_size", help="batch size", type=int, default=128)
     parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
+    parser.add_argument("--optimizer_type", help="optimizer: adam, sgd", default='adam')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bceloss')
     parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
     parser.add_argument("--patience_es", default=2, help="nb epochs before early stopping", type=int)
@@ -146,6 +154,7 @@ if __name__ == '__main__':
     epochs = args.epochs
     patience_es = args.patience_es
     lr = args.lr
+    optimizer_type = args.optimizer_type
     loss_criterion = args.loss_criterion
     model_type = args.model
     do_save = args.do_save
@@ -159,5 +168,5 @@ if __name__ == '__main__':
 
     ENGLISH, dataloaders = get_dataloaders(training_data, testset_data, test_labels_data, batch_size, device)
 
-    main(dataloaders, ENGLISH, model_type, loss_criterion, lr, 
+    main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=True)
