@@ -1,3 +1,4 @@
+import time
 import argparse
 import datetime
 
@@ -45,7 +46,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'epochs': [], 
                     'batch_size': [], 
                     'patience_es': [], 
-                    'last_epoch': [], 
+                    'best_epoch': [], 
                     'train_loss': [], 
                     'val_loss': [], 
                     'train_acc': [], 
@@ -54,6 +55,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'end_time': []}
 
     # Start gridsearch
+    start_time = time.time()
     for params in itertools.product(*all_config_list):
         # /!\ Has to be in the same order as in the config.yaml file /!\ #
         model_type, optimizer_type, \
@@ -69,10 +71,10 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                                do_print=False, training_remaining=training_remaining)
 
         # Save training results to csv
-        last_epoch = history_training['last_epoch']
+        best_epoch = history_training['best_epoch']
         for key in results_dict.keys():
             if key in ['train_loss', 'val_loss', 'train_acc', 'val_acc']:
-                results_dict[key].append(history_training[key][last_epoch])
+                results_dict[key].append(history_training[key][best_epoch])
             elif key == 'batch_size':
                 results_dict['batch_size'].append(batch_size)
             else:
@@ -83,6 +85,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
 
         training_remaining -= 1
 
+    time_elapsed = time.time() - start_time
+    print('\nGridsearch complete in {:.0f}m {:.0f}s'.format(
+          time_elapsed // 60, time_elapsed % 60))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
