@@ -11,7 +11,8 @@ from sklearn.metrics import f1_score
 from utils import EarlyStopping
 
 def train_model(model, criterion, optimizer, dataloaders, history_training, 
-                scheduler=None, num_epochs=10, patience_es=5, training_remaining=1):
+                scheduler=None, num_epochs=10, patience_es=5, training_remaining=1,
+                save_condition='acc'):
     '''
     Main training function
     '''
@@ -22,6 +23,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
     best_val_acc = 0.0
+    min_val_loss = float('inf')
 
     history_training['epochs'] = np.arange(num_epochs)
 
@@ -90,10 +92,16 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
             if phase == 'val':
                 valid_loss = epoch_loss # Register validation loss for Early Stopping
 
-                if epoch_acc > best_val_acc:
-                    best_val_acc = epoch_acc
-                    history_training['last_epoch'] = epoch
-                    best_model_wts = copy.deepcopy(model.state_dict())
+                if save_condition == 'acc':
+                    if epoch_acc > best_val_acc:
+                        best_val_acc = epoch_acc
+                        history_training['last_epoch'] = epoch
+                        best_model_wts = copy.deepcopy(model.state_dict())
+                else:
+                    if epoch_loss < min_val_loss:
+                        min_val_loss = epoch_loss
+                        history_training['last_epoch'] = epoch
+                        best_model_wts = copy.deepcopy(model.state_dict())
 
         print("Epoch complete in {:.1f}s\n".format(time.time() - lasttime))
 
@@ -102,16 +110,15 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
         if early_stopping.early_stop:
             print("Early stopping")
-            history_training['best_val_acc'] = best_val_acc
             history_training['epochs'] = np.arange(epoch + 1)
             break
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
+    best_val_acc = history_training['val_acc'][history_training['last_epoch']]
     best_val_acc = round(float(best_val_acc), 4)
     print('Best val Acc: {:4f}'.format(best_val_acc))
-    history_training['best_val_acc'] = best_val_acc
 
     # Load best model weights
     model.load_state_dict(best_model_wts)

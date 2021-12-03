@@ -15,6 +15,9 @@ from sklearn.metrics import confusion_matrix
 
 from models import BasicLSTM, BiLSTM
 
+SAVED_MODELS_PATH = "saved_models/"
+FIGURES_PATH = "figures/"
+
 def load_model(model_type, field, device):
     """
     Load and return model.
@@ -116,7 +119,7 @@ def plot_cm(hist, figures_path, model_type, do_save, do_plot=False, do_print=Fal
 # From https://github.com/Bjarten/early-stopping-pytorch
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
-    def __init__(self, patience=7, verbose=False, delta=0, path='saved_models/checkpoint.pt'):
+    def __init__(self, patience=7, verbose=False, delta=0, path=SAVED_MODELS_PATH+'checkpoint.pt'):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
