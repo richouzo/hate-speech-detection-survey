@@ -18,8 +18,10 @@ def get_gridsearch_config(config_path, params_name):
 
     hyperparameters = config['hyperparameters']
     print('hyperparameters keys', list(hyperparameters.keys()))
+    assert set(hyperparameters.keys()) == set(params_name)
+
     all_config_list = []
-    for param_name in params_name:
+    for param_name in hyperparameters.keys():
         all_config_list.append(hyperparameters[param_name])
 
     return all_config_list
@@ -50,11 +52,17 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'epochs': [], 
                     'batch_size': [], 
                     'patience_es': [], 
+                    'last_epoch': [], 
+                    'train_loss': [], 
+                    'val_loss': [], 
+                    'train_acc': [], 
+                    'val_acc': [], 
                     'test_acc': [], 
                     'end_time': []}
 
     # Start gridsearch
     for params in itertools.product(*all_config_list):
+        # /!\ Has to be in the same order as in the config.yaml file /!\ #
         model_type, optimizer_type, \
         loss_criterion, lr, epochs, \
         batch_size, patience_es = params
@@ -68,10 +76,15 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                                do_print=False, training_remaining=training_remaining)
 
         # Save training results to csv
-        for idx, param_name in enumerate(params_name):
-            results_dict[param_name].append(params[idx])
-        results_dict['test_acc'].append(history_training['test_acc'])
-        results_dict['end_time'].append(history_training['current_time'])
+        last_epoch = history_training['last_epoch']
+        for key in results_dict.keys():
+            if key in ['train_loss', 'val_loss', 'train_acc', 'val_acc']:
+                results_dict[key].append(history_training[key][last_epoch])
+            elif key == 'batch_size':
+                results_dict['batch_size'].append(batch_size)
+            else:
+                results_dict[key].append(history_training[key])
+
         results_csv = pd.DataFrame(data=results_dict)
         results_csv.to_csv(csv_path)
 

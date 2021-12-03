@@ -92,6 +92,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
                 if epoch_acc > best_val_acc:
                     best_val_acc = epoch_acc
+                    history_training['last_epoch'] = epoch
                     best_model_wts = copy.deepcopy(model.state_dict())
 
         print("Epoch complete in {:.1f}s\n".format(time.time() - lasttime))

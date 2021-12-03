@@ -59,7 +59,13 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
     history_training = {'train_loss': [],
                         'val_loss': [],
                         'train_acc': [],
-                        'val_acc': []}
+                        'val_acc': [], 
+                        'model_type': model_type,
+                        'optimizer_type': optimizer_type,
+                        'loss_criterion': loss_criterion,
+                        'lr': lr,
+                        'epochs': epochs,
+                        'patience_es': patience_es}
 
 
     ### Training phase ###
@@ -73,8 +79,8 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
     history_training = test_model(model=model, history_training=history_training, criterion=criterion, 
                                   dataloaders=dataloaders)
 
-    current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    history_training['current_time'] = current_time
+    end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    history_training['end_time'] = end_time
 
     ### Save the model ###
     save_model(model=model, hist=history_training,
