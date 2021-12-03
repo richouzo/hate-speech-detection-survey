@@ -7,9 +7,10 @@ import spacy
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-SAVED_MODELS_PATH = "saved_models/"
-FIGURES_PATH = "figures/"
-CSV_PATH = "csv/"
+spacy_en = spacy.load("en_core_web_sm")
+
+def tokenizer(text):
+    return [tok.text for tok in spacy_en.tokenizer(text)]
 
 def format_training_file(text_file):
     tweets = []
@@ -81,3 +82,34 @@ def create_iterators(train_data, test_data, batch_size, dev, shuffle=False):
         sort = False,
         )
     return train_iterator, test_iterator
+
+def get_datasets(training_data, testset_data, test_labels_data):
+    # preprocessing of the train/validation tweets, then test tweets
+    tweets, classes = format_training_file(training_data)
+    tweets_test, y_test = format_test_file(testset_data, test_labels_data)
+    print("file loaded and formatted..")
+    train_val_split_tocsv(tweets, classes, val_size=0.2)
+    test_tocsv(tweets_test, y_test)
+    print("data split into train/val/test")
+
+    ENGLISH, LABEL, train_data, val_data, test_data = create_fields_dataset(tokenizer)
+
+    # build vocabularies using training set
+    print("fields and dataset object created")
+    ENGLISH.build_vocab(train_data, max_size=10000, min_freq=2)
+    LABEL.build_vocab(train_data)
+    print("vocabulary built..")
+
+    return (ENGLISH, train_data, val_data, test_data)
+
+def get_dataloaders(train_data, val_data, test_data, batch_size, device):
+    train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)
+    _, test_iterator = create_iterators(train_data, test_data, batch_size, device, shuffle=False)
+    print("dataloaders created..")
+
+    dataloaders = {}
+    dataloaders['train'] = train_iterator
+    dataloaders['val'] = val_iterator
+    dataloaders['test'] = test_iterator
+
+    return dataloaders

@@ -9,8 +9,8 @@ import torch
 import itertools
 import yaml
 
-from preprocess_utils import *
-from main import get_datasets, get_dataloaders, main
+from preprocess_utils import get_datasets, get_dataloaders
+from main import main
 
 def get_gridsearch_config(config_path, params_name):
     with open(config_path, "r") as ymlfile:
