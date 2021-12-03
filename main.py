@@ -18,7 +18,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from preprocess_utils import *
 from train import train_model, test_model
-from models import BasicLSTM
+from models import BasicLSTM, BiLSTM
 
 from utils import save_model, plot_training, plot_cm, classif_report
 
@@ -76,6 +76,9 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
         model = None #other models here
     elif model_type == 'BasicLSTM':
         model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=ENGLISH.vocab.__len__(), 
+                                    hidden_dim=128, num_layers=2, output_dim=1)
+    elif model_type == 'BiLSTM':
+        model = BiLSTM.BiLSTM(dim_emb=300, num_words=ENGLISH.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
     else:
         model = None
