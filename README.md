@@ -17,8 +17,21 @@ pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
+## Training
+
 Start training:
 
 ```bash
 python main.py
+```
+
+
+## Gridsearch training
+
+You can modify the gridsearch parameters in *gridsearch_config.yaml*
+
+Gridsearch:
+
+```bash
+python gridsearch.py
 ```
