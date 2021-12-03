@@ -20,5 +20,5 @@ python -m spacy download en_core_web_sm
 Start training:
 
 ```bash
-python main.py --data "data/offenseval-training-v1.tsv" --batch_size=128
+python main.py
 ```
