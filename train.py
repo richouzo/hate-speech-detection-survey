@@ -94,12 +94,12 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
                 valid_loss = epoch_loss # Register validation loss for Early Stopping
 
                 if save_condition == 'acc':
-                    if epoch_acc > best_val_acc:
+                    if epoch_acc >= best_val_acc:
                         best_val_acc = epoch_acc
                         history_training['best_epoch'] = epoch
                         best_model_wts = copy.deepcopy(model.state_dict())
                 else:
-                    if epoch_loss < min_val_loss:
+                    if epoch_loss <= min_val_loss:
                         min_val_loss = epoch_loss
                         history_training['best_epoch'] = epoch
                         best_model_wts = copy.deepcopy(model.state_dict())
