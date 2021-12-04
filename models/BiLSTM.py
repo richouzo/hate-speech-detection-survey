@@ -31,6 +31,6 @@ class BiLSTM(nn.Module):
         #we retrive the last hidden node in the lstm and use it to predict the class using a sigmoid
         #the training uses binary cross entropy so model output should be float value between 0 and 1
         hid2lab = self.hidden2label(torch.tanh(bilstm_hidden))
-        label = torch.sigmoid(hid2lab).view(-1)
+        label = hid2lab.view(-1)
         return label
 

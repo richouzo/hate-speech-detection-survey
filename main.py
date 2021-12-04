@@ -33,11 +33,11 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print("Model {} loaded on {}".format(model_type, device))
 
     if loss_criterion == 'bceloss':
-        criterion = nn.BCELoss()
+        criterion = nn.BCEWithLogitsLoss()
     elif loss_criterion == 'crossentropy':
         criterion = nn.CrossEntropyLoss()
     else: # Default to BCELoss
-        criterion = nn.BCELoss()
+        criterion = nn.BCEWithLogitsLoss()
 
     print('Loss used: {}'.format(criterion))
 
