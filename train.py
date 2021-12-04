@@ -26,6 +26,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
     min_val_loss = float('inf')
 
     history_training['epochs'] = np.arange(num_epochs)
+    history_training['best_epoch'] = num_epochs - 1
 
     # Iterate over epochs.
     for epoch in range(num_epochs):
