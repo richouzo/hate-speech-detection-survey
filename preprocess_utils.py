@@ -8,7 +8,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 spacy_en = spacy.load("en_core_web_sm")
-
 def tokenizer(text):
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
@@ -49,9 +48,9 @@ def test_tocsv(tweets_test, y_test):
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
 def create_fields_dataset(tokenizer_func):
-    ENGLISH = Field(sequential = True, use_vocab = True, tokenize=tokenizer_func, lower=True)
-    LABEL = LabelField(dtype=torch.long, batch_first=True, sequential=False)
-    fields = [('text', ENGLISH), ('label', LABEL)]
+    field = Field(sequential = True, use_vocab = True, tokenize=tokenizer_func, lower=True)
+    label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
+    fields = [('text', field), ('label', label)]
     print("field objects created")
     train_data, val_data = TabularDataset.splits(
         path = '',
@@ -70,7 +69,7 @@ def create_fields_dataset(tokenizer_func):
         skip_header=True,
     )
 
-    return (ENGLISH, LABEL, train_data, val_data, test_data)
+    return (field, label, train_data, val_data, test_data)
 
 #Create train and test iterators to use during the training loop
 def create_iterators(train_data, test_data, batch_size, dev, shuffle=False):
@@ -83,6 +82,11 @@ def create_iterators(train_data, test_data, batch_size, dev, shuffle=False):
         )
     return train_iterator, test_iterator
 
+def get_vocab_stoi_itos(field):
+    vocab_stoi = field.vocab.stoi
+    vocab_itos = field.vocab.itos
+    return (vocab_stoi, vocab_itos)
+
 def get_datasets(training_data, testset_data, test_labels_data):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
@@ -92,15 +96,15 @@ def get_datasets(training_data, testset_data, test_labels_data):
     test_tocsv(tweets_test, y_test)
     print("data split into train/val/test")
 
-    ENGLISH, LABEL, train_data, val_data, test_data = create_fields_dataset(tokenizer)
+    field, label, train_data, val_data, test_data = create_fields_dataset(tokenizer)
 
     # build vocabularies using training set
     print("fields and dataset object created")
-    ENGLISH.build_vocab(train_data, max_size=10000, min_freq=2)
-    LABEL.build_vocab(train_data)
+    field.build_vocab(train_data, max_size=10000, min_freq=2)
+    label.build_vocab(train_data)
     print("vocabulary built..")
 
-    return (ENGLISH, train_data, val_data, test_data)
+    return (field, train_data, val_data, test_data)
 
 def get_dataloaders(train_data, val_data, test_data, batch_size, device):
     train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)

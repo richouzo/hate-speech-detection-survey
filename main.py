@@ -16,7 +16,7 @@ from train import train_model, test_model
 
 from utils import load_model, save_model, plot_training, plot_cm, classif_report
 
-def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
+def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc'):
     print()
     print('model_type:', model_type)
@@ -28,7 +28,7 @@ def main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr,
     print()
 
     # Instanciate model 
-    model = load_model(model_type, ENGLISH, device)
+    model = load_model(model_type, field, device)
 
     print("Model {} loaded on {}".format(model_type, device))
 
@@ -145,9 +145,9 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    ENGLISH, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
-    main(dataloaders, ENGLISH, model_type, optimizer_type, loss_criterion, lr, 
+    main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
          epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition)
