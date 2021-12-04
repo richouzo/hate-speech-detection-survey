@@ -1,10 +1,15 @@
+import re
+import emoji
 import numpy as np
+
 import torch
 from torchtext.legacy.data import Field, LabelField, TabularDataset, BucketIterator
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
+
 import spacy
 import pandas as pd
+
 from sklearn.model_selection import train_test_split
 
 spacy_en = spacy.load("en_core_web_sm")
@@ -16,6 +21,12 @@ def format_training_file(text_file):
     classes = []
 
     for line in open(text_file,'r',encoding='utf-8'):
+        line = re.sub(r'#([^ ]*)', r'\1', line)
+        line = re.sub(r'https.*[^ ]', 'URL', line)
+        line = re.sub(r'http.*[^ ]', 'URL', line)
+        line = emoji.demojize(line)
+        line = re.sub(r'(:.*?:)', r' \1 ', line)
+        line = re.sub(' +', ' ', line)
         line = line.rstrip('\n').split('\t')
         tweets.append(line[1])
         classes.append(int(line[2]=='OFF'))
@@ -35,6 +46,12 @@ def format_test_file(text_file_testset, text_file_labels):
     tweets_test = []
     y_test = []
     for line in open(text_file_testset,'r',encoding='utf-8'):
+        line = re.sub(r'#([^ ]*)', r'\1', line)
+        line = re.sub(r'https.*[^ ]', 'URL', line)
+        line = re.sub(r'http.*[^ ]', 'URL', line)
+        line = emoji.demojize(line)
+        line = re.sub(r'(:.*?:)', r' \1 ', line)
+        line = re.sub(' +', ' ', line)
         line = line.rstrip('\n').split('\t')
         tweets_test.append(line[1])
     for line in open(text_file_labels,'r',encoding='utf-8'):
