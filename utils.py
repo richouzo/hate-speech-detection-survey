@@ -39,7 +39,7 @@ def load_trained_model(model, saved_model_path, device):
     """
     Load and return trained model. Initialize the model first with load_model().
     """
-    model.load_state_dict(torch.load(saved_model_path), map_location=device)
+    model.load_state_dict(torch.load(saved_model_path, map_location=device))
     print(f"{saved_model_path} loaded.")
     model.to(device)
 
