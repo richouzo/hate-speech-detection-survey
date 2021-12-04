@@ -33,10 +33,12 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print("Model {} loaded on {}".format(model_type, device))
 
     if loss_criterion == 'bceloss':
+        criterion = nn.BCELoss()
+    elif loss_criterion == 'bcelosswithlogits':
         criterion = nn.BCEWithLogitsLoss()
     elif loss_criterion == 'crossentropy':
         criterion = nn.CrossEntropyLoss()
-    else: # Default to BCELoss
+    else: # Default to BCEWithLogitsLoss
         criterion = nn.BCEWithLogitsLoss()
 
     print('Loss used: {}'.format(criterion))
@@ -112,7 +114,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", help="batch size", type=int, default=128)
     parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
     parser.add_argument("--optimizer_type", help="optimizer: adam, sgd", default='adam')
-    parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bceloss')
+    parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
     parser.add_argument("--patience_es", default=2, help="nb epochs before early stopping", type=int)
     parser.add_argument("--do_save", default=1, help="1 for saving stats and figures, else 0", type=int)
