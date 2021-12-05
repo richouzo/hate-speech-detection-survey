@@ -33,9 +33,9 @@ class HybridCNNLSTM(nn.Module):
         conv3_reshaped = conv3.permute(2, 0, 1)
 
         X_mask = (torch.where(x==1,0,1))
+
         X_packed = pack_padded_sequence(conv3_reshaped, X_mask.sum(axis=0).tolist(), batch_first=False, enforce_sorted=False)
         lstm_hidden, _ = self.lstm(X_packed)[1][-1]
-
 
         linear1 = self.relu1(self.linear1(lstm_hidden))
         linear2 = self.relu2(self.linear2(linear1))

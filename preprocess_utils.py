@@ -64,8 +64,8 @@ def test_tocsv(tweets_test, y_test):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
-def create_fields_dataset(tokenizer_func):
-    field = Field(sequential = True, use_vocab = True, tokenize=tokenizer_func, lower=True)
+def create_fields_dataset(tokenizer_func, fix_length):
+    field = Field(sequential = True, use_vocab = True, tokenize=tokenizer_func, lower=True, fix_length=fix_length)
     label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
     fields = [('text', field), ('label', label)]
     print("field objects created")
@@ -104,7 +104,7 @@ def get_vocab_stoi_itos(field):
     vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
-def get_datasets(training_data, testset_data, test_labels_data):
+def get_datasets(training_data, testset_data, test_labels_data, fix_length):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
     tweets_test, y_test = format_test_file(testset_data, test_labels_data)
@@ -113,7 +113,7 @@ def get_datasets(training_data, testset_data, test_labels_data):
     test_tocsv(tweets_test, y_test)
     print("data split into train/val/test")
 
-    field, label, train_data, val_data, test_data = create_fields_dataset(tokenizer)
+    field, label, train_data, val_data, test_data = create_fields_dataset(tokenizer, fix_length)
 
     # build vocabularies using training set
     print("fields and dataset object created")
