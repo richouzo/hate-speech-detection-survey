@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-from models import BasicLSTM, BiLSTM
+from models import BasicLSTM, BiLSTM, Transformers
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
@@ -29,6 +29,9 @@ def load_model(model_type, field, device):
     elif model_type == 'BiLSTM':
         model = BiLSTM.BiLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
+    elif model_type == 'Transformers':
+        model = Transformers.Transformers(dim_emb=128, num_words=field.vocab.__len__(), 
+                                          hidden_dim=128, num_layers=2, output_dim=1)
     else:
         model = None
     model.to(device)
