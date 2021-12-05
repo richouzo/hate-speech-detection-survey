@@ -2,42 +2,45 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, DistilBertModel
+from transformers import AutoConfig, AutoModel
 
-class Transformers(nn.Module):
+class DistillBert(nn.Module):
+    def __init__(self, dropout=0.2, num_classes=2, output_dim=1):
+        super(DistillBert, self).__init__()
 
-    def __init__(self, dim_emb=768, num_words = 10000, hidden_dim = 128, num_layers = 2, output_dim = 1):
-        super(Transformers, self).__init__()
+        pretrained_model_name = "distilbert-base-uncased"
 
-        self.emb = nn.Embedding(num_words, dim_emb, padding_idx=1)
-        self.bert = AutoModelForSequenceClassification.from_pretrained("prajjwal1/bert-tiny", 
-                                                                       output_hidden_states=True) 
-                                                                       #"bert-base-cased-finetuned-mrpc")
-                                                                       # "distilbert-base-uncased-finetuned-sst-2-english"
-                                                                       
-        self.rnn = nn.LSTM(dim_emb, hidden_dim, num_layers, batch_first = False ,bidirectional=True)
-        self.linear = nn.Linear(hidden_dim, output_dim)
+        config = AutoConfig.from_pretrained(
+            pretrained_model_name, num_labels=num_classes
+        )
 
-        # for name, p in self.named_parameters():
-        #     if "bert" in name:
-        #         p.requires_grad = False
+        self.bert = AutoModel.from_pretrained(pretrained_model_name, config=config)
+        self.classifier = nn.Linear(config.hidden_size, output_dim)
+        self.dropout = nn.Dropout(dropout)
+
+        # Freeze bert layers
+        for name, p in self.named_parameters():
+            if "bert" in name:
+                p.requires_grad = False
 
     def forward(self, x):
+        x = x.permute(1, 0)
+        # print('x', x)
+        attention_mask = (torch.where(x==0, 0, 1)) # pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token) = 0
+        # print('attention_mask', attention_mask)
+        bert_output = self.bert(input_ids=x, attention_mask=attention_mask)
+        # print('bert_output', bert_output)
+        # qzdqz
+        # we only need the hidden state here and don't need
+        # transformer output, so index 0
+        seq_output = bert_output[0]  # (bs, seq_len, dim)
+        # mean pooling, i.e. getting average representation of all tokens
+        pooled_output = seq_output.mean(axis=1)  # (bs, dim)
+        pooled_output = self.dropout(pooled_output)  # (bs, dim)
+        scores = self.classifier(pooled_output).view(-1)  # (bs, num_classes)
 
-        #we send our word indices through an embedding layer to turn the into word vectors
-        #all our models must to this step, the simplest way is pytorch embedding layer used in this example
+        # print('scores', scores.shape)
 
-        output = self.bert(x.permute(1, 0)).hidden_states[0]
-        output = output.permute(1, 0, 2)
-        # print(output.shape)
-
-        X_mask = (torch.where(x==1,0,1))
-        # print('X_mask', X_mask.shape)
-        X_packed = pack_padded_sequence(output, X_mask.sum(axis=0).tolist(), 
-                                        batch_first=False, enforce_sorted=False)
-        rnn_hidden = self.rnn(X_packed)[1][0][-1]
-
-        logits = self.linear(torch.tanh(rnn_hidden)).view(-1)
-
-        return logits
+        return scores
 

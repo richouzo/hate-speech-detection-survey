@@ -12,9 +12,7 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
-spacy_en = spacy.load("en_core_web_sm")
-def tokenizer(text):
-    return [tok.text for tok in spacy_en.tokenizer(text)]
+import transformers
 
 def format_training_file(text_file):
     tweets = []
@@ -64,8 +62,18 @@ def test_tocsv(tweets_test, y_test):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
-def create_fields_dataset(tokenizer_func):
-    field = Field(sequential = True, use_vocab = True, tokenize=tokenizer_func, lower=True)
+def create_fields_dataset(model_type):
+    if model_type == "DistillBert":
+        tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+        pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
+        print('pad_index', pad_index)
+        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
+    else:
+        spacy_en = spacy.load("en_core_web_sm")
+        def tokenizer(text):
+            return [tok.text for tok in spacy_en.tokenizer(text)]
+        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True)
+
     label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
     fields = [('text', field), ('label', label)]
     print("field objects created")
@@ -104,7 +112,7 @@ def get_vocab_stoi_itos(field):
     vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
-def get_datasets(training_data, testset_data, test_labels_data):
+def get_datasets(training_data, testset_data, test_labels_data, model_type):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
     tweets_test, y_test = format_test_file(testset_data, test_labels_data)
@@ -113,7 +121,7 @@ def get_datasets(training_data, testset_data, test_labels_data):
     test_tocsv(tweets_test, y_test)
     print("data split into train/val/test")
 
-    field, label, train_data, val_data, test_data = create_fields_dataset(tokenizer)
+    field, label, train_data, val_data, test_data = create_fields_dataset(model_type)
 
     # build vocabularies using training set
     print("fields and dataset object created")
