@@ -58,6 +58,7 @@ if __name__ == '__main__':
     parser.add_argument("--stats_metric", default='loss', help="metric to retrieve stats")
     parser.add_argument("--stats_topk", default=5, help="topk indexes to retrieve", type=int)
     parser.add_argument("--stats_label", default=0, help="label indexes to retrieve", type=int)
+    parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
 
     args = parser.parse_args()
 
@@ -72,6 +73,7 @@ if __name__ == '__main__':
     saved_model_path = args.saved_model_path
     loss_criterion = args.loss_criterion
     model_type = args.model
+    fix_length = args.fix_length
 
     # Get model_id
     regex = '\d+-\d+-\d+_\d+-\d+-\d+'
@@ -102,7 +104,7 @@ if __name__ == '__main__':
             device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         print("Device:", device)
 
-        field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+        field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         stats_df = main_test(dataloaders, phase, field, model_type, csv_path, 
