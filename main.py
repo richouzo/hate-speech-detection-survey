@@ -75,7 +75,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
 
     ### Testing ###
-    history_training = test_model(model=model, history_training=history_training, criterion=criterion, 
+    history_training = test_model(model=model, history_training=history_training, 
                                   dataloaders=dataloaders)
 
     end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
