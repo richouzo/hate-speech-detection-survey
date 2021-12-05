@@ -18,6 +18,7 @@ from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
 GRIDSEARCH_CSV = "gridsearch_results/"
+STATS_CSV = "stats_results/"
 
 def load_model(model_type, field, device):
     """
