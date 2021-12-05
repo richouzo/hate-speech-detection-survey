@@ -62,7 +62,7 @@ def test_tocsv(tweets_test, y_test):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
-def create_fields_dataset(model_type, fix_length):
+def create_fields_dataset(model_type, fix_length=None):
     if model_type == "DistillBert":
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
@@ -112,7 +112,7 @@ def get_vocab_stoi_itos(field):
     vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
-def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length):
+def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length=None):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
     tweets_test, y_test = format_test_file(testset_data, test_labels_data)
