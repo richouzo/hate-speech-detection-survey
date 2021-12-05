@@ -11,4 +11,5 @@ spacy
 torchtext
 PyYAML
 transformers
-captrum
+captum
+emoji
