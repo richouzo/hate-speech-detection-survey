@@ -62,7 +62,7 @@ def test_tocsv(tweets_test, y_test):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
-def create_fields_dataset(model_type):
+def create_fields_dataset(model_type, fix_length):
     if model_type == "DistillBert":
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
@@ -72,7 +72,7 @@ def create_fields_dataset(model_type):
         spacy_en = spacy.load("en_core_web_sm")
         def tokenizer(text):
             return [tok.text for tok in spacy_en.tokenizer(text)]
-        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True)
+        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True, fix_length=fix_length)
 
     label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
     fields = [('text', field), ('label', label)]
@@ -112,7 +112,7 @@ def get_vocab_stoi_itos(field):
     vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
-def get_datasets(training_data, testset_data, test_labels_data, model_type):
+def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length):
     # preprocessing of the train/validation tweets, then test tweets
     tweets, classes = format_training_file(training_data)
     tweets_test, y_test = format_test_file(testset_data, test_labels_data)
@@ -121,7 +121,7 @@ def get_datasets(training_data, testset_data, test_labels_data, model_type):
     test_tocsv(tweets_test, y_test)
     print("data split into train/val/test")
 
-    field, label, train_data, val_data, test_data = create_fields_dataset(model_type)
+    field, label, train_data, val_data, test_data = create_fields_dataset(model_type, fix_length)
 
     # build vocabularies using training set
     print("fields and dataset object created")

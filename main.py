@@ -17,7 +17,7 @@ from train import train_model, test_model
 from utils import load_model, save_model, plot_training, plot_cm, classif_report
 
 def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc'):
+         epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc', fix_length=None):
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -28,7 +28,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print()
 
     # Instanciate model 
-    model = load_model(model_type, field, device)
+    model = load_model(model_type, field, device, fix_length=fix_length)
 
     print("Model {} loaded on {}".format(model_type, device))
 
@@ -116,11 +116,12 @@ if __name__ == '__main__':
     parser.add_argument("--optimizer_type", help="optimizer: adam, sgd", default='adam')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
-    parser.add_argument("--patience_es", default=2, help="nb epochs before early stopping", type=int)
+    parser.add_argument("--patience_es", default=5, help="nb epochs before early stopping", type=int)
     parser.add_argument("--do_save", default=1, help="1 for saving stats and figures, else 0", type=int)
     parser.add_argument("--save_condition", help="save model with"+\
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
     parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
+    parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
 
     args = parser.parse_args()
 
@@ -139,6 +140,7 @@ if __name__ == '__main__':
     model_type = args.model
     do_save = args.do_save
     save_condition = args.save_condition
+    fix_length = args.fix_length
 
     if args.device in ['cuda', 'cpu']:
         device = args.device
@@ -147,10 +149,9 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type)
+    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
     main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition)
+         epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, fix_length=fix_length)
