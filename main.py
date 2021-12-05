@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, fix_length)
+    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
