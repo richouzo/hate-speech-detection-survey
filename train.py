@@ -28,6 +28,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
     history_training['epochs'] = np.arange(num_epochs)
     history_training['best_epoch'] = num_epochs - 1
+    loss_criterion = history_training['loss_criterion']
 
     # Iterate over epochs.
     for epoch in range(num_epochs):
@@ -55,7 +56,8 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
             for batch_idx, (inputs, labels) in enumerate(dataloaders[phase]):
                 pbar.update()
                 pbar.set_description("Processing batch %s" % str(batch_idx+1))
-                labels = labels.float()
+                if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+                    labels = labels.float()
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
@@ -73,7 +75,10 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
-                preds = torch.where(outputs > 0.5, 1, 0).tolist()
+                if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+                    preds = torch.where(outputs > 0.5, 1, 0).tolist()
+                else:
+                    preds = torch.argmax(outputs, 1).tolist()
                 preds_list += preds
                 labels_list += labels.tolist()
 
@@ -145,6 +150,7 @@ def test_model(model, history_training, criterion, dataloaders):
 
     nb_batches = len(dataloaders[phase])
     length_phase = len(dataloaders[phase].dataset)
+    loss_criterion = history_training['loss_criterion']
 
     pbar = tqdm.tqdm([i for i in range(nb_batches)])
 
@@ -152,7 +158,8 @@ def test_model(model, history_training, criterion, dataloaders):
     for batch_idx, (inputs, labels) in enumerate(dataloaders[phase]):
         pbar.update()
         pbar.set_description("Processing batch %s" % str(batch_idx+1))
-        labels = labels.float()
+        if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+            labels = labels.float()
 
         # forward
         # track history if only in train
@@ -162,7 +169,10 @@ def test_model(model, history_training, criterion, dataloaders):
 
         # statistics
         running_loss += loss.item() * inputs.size(0)
-        preds = torch.where(outputs > 0.5, 1, 0).tolist()
+        if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+            preds = torch.where(outputs > 0.5, 1, 0).tolist()
+        else:
+            preds = torch.argmax(outputs, 1).tolist()
         preds_list += preds
         labels_list += labels.tolist()
 
@@ -216,7 +226,8 @@ def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, 
     for batch_idx, (inputs, labels) in enumerate(dataloaders[phase]):
         pbar.update()
         pbar.set_description("Processing batch %s" % str(batch_idx+1))
-        labels = labels.float()
+        if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+            labels = labels.float()
 
         # forward
         # track history if only in train
@@ -226,7 +237,10 @@ def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, 
 
         # statistics
         running_loss += loss.item() * inputs.size(0)
-        preds = torch.where(outputs > 0.5, 1, 0).tolist()
+        if loss_criterion in ['bceloss', 'bcelosswithlogits']:
+            preds = torch.where(outputs > 0.5, 1, 0).tolist()
+        else:
+            preds = torch.argmax(outputs, 1).tolist()
         preds_list += preds
         labels_list += labels.tolist()
 
