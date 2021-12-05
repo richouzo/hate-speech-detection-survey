@@ -18,6 +18,7 @@ from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
 GRIDSEARCH_CSV = "gridsearch_results/"
+STATS_CSV = "stats_results/"
 
 def load_model(model_type, field, device, fix_length=None):
     """
@@ -34,8 +35,10 @@ def load_model(model_type, field, device, fix_length=None):
                                           hidden_dim=128, num_layers=2, output_dim=1)
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
+        
     elif model_type == 'HybridLSTMCNN':
 	      model = Hybrid_LSTM_CNN.HybridLSTMCNN(fix_length=fix_length)
+        
     else:
         model = None
     model.to(device)

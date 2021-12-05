@@ -5,6 +5,7 @@ import tqdm
 import copy
 
 import torch
+import torch.nn as nn
 
 from sklearn.metrics import f1_score
 
@@ -179,3 +180,83 @@ def test_model(model, history_training, criterion, dataloaders):
     print("Inference on Testset complete in {:.1f}s\n".format(time.time() - start_time))
 
     return history_training
+
+def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, stats_dict):
+    """
+    Testing function and save stats on the testset.
+    """
+    print("\n\n**TESTING**\n")
+
+    if loss_criterion == 'bceloss':
+        criterion = nn.BCELoss()
+    elif loss_criterion == 'bcelosswithlogits':
+        criterion = nn.BCEWithLogitsLoss()
+    elif loss_criterion == 'crossentropy':
+        criterion = nn.CrossEntropyLoss()
+    else: # Default to BCEWithLogitsLoss
+        criterion = nn.BCEWithLogitsLoss()
+
+    print('Loss used: {}'.format(criterion))
+
+    start_time = time.time()
+    model.eval()
+
+    running_loss = 0.0
+    preds_list = []
+    labels_list = []
+
+    nb_batches = len(dataloaders[phase])
+    length_phase = len(dataloaders[phase].dataset)
+
+    assert nb_batches == length_phase, "Batch size has to be equal to 1"
+
+    pbar = tqdm.tqdm([i for i in range(nb_batches)])
+
+    # Iterate over data.
+    for batch_idx, (inputs, labels) in enumerate(dataloaders[phase]):
+        pbar.update()
+        pbar.set_description("Processing batch %s" % str(batch_idx+1))
+        labels = labels.float()
+
+        # forward
+        # track history if only in train
+        with torch.set_grad_enabled(False):
+            outputs = model.forward(inputs)
+            loss = criterion(outputs, labels)
+
+        # statistics
+        running_loss += loss.item() * inputs.size(0)
+        preds = torch.where(outputs > 0.5, 1, 0).tolist()
+        preds_list += preds
+        labels_list += labels.tolist()
+
+        # save to stats_dict
+        stats_dict['original_index'].append(batch_idx)
+
+        text = ""
+        list_tokens = list(inputs.squeeze(0).detach())
+        for i in range(len(list_tokens)):
+            text += field.vocab.itos[list_tokens[i]] + " "
+        stats_dict['text'].append(text)
+
+        stats_dict['true_label'].append(int(labels[0]))
+        stats_dict['pred_label'].append(int(preds[0]))
+
+        if loss_criterion in ['bcelosswithlogits']:
+            prob = float(torch.sigmoid(outputs[0]).detach().cpu())
+        else:
+            prob = float(outputs[0].detach().cpu())
+        stats_dict['prob'].append(prob)
+
+        stats_dict['loss'].append(loss.item())
+
+    pbar.close()
+
+    test_loss = running_loss / length_phase
+    test_acc = f1_score(labels_list, preds_list)
+    test_acc = round(float(test_acc), 4)
+
+    print('\nTest stats -  Loss: {:.4f} Acc: {:.2f}%'.format(test_loss, test_acc*100))
+    print("Inference on Testset complete in {:.1f}s\n".format(time.time() - start_time))
+
+    return stats_dict
