@@ -33,7 +33,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
 
     model_type = all_config_list[0][0]
     prev_model_type = model_type
-    ENGLISH, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type)
+    ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type)
 
     training_remaining = np.prod([len(config) for config in all_config_list])
     print('Training to do:', training_remaining)
@@ -68,7 +68,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
             print("prev_model_type", prev_model_type)
             print("model_type", model_type)
             print("Changing tokenizer...")
-            ENGLISH, train_data, val_data, test_data = get_datasets(training_data, 
+            ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, 
                                                                     testset_data, test_labels_data, 
                                                                     model_type)
             prev_model_type = model_type
