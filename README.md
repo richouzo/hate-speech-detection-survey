@@ -32,7 +32,7 @@ python main.py
 
 Gridsearch csv files are saved in gridsearch_results folder.
 
-You can modify the gridsearch parameters in [gridsearch_config.yaml](gridsearch_config.yaml).
+You can modify the gridsearch parameters in [gridsearch_config.yml](gridsearch_config.yml).
 
 Start gridsearch:
 
