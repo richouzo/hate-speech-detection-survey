@@ -19,7 +19,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
     '''
     print("\n**TRAINING**\n")
     # Init Early stoping class
-    early_stopping = EarlyStopping(patience=patience_es, verbose=False, delta=0)
+    early_stopping = EarlyStopping(patience=patience_es, verbose=False, delta=0, save_condition=save_condition)
 
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -100,16 +100,19 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
             # deep copy the model
             if phase == 'val':
-                valid_loss = epoch_loss # Register validation loss for Early Stopping
+                valid_loss = None
+                valid_acc = None
                 if scheduler_type == 'reduce_lr_on_plateau' and epoch != 0:
                     scheduler.step(history_training['val_loss'][-1])
 
                 if save_condition == 'acc':
+                    valid_acc = epoch_acc # Register validation acc for Early Stopping
                     if epoch_acc >= best_val_acc:
                         best_val_acc = epoch_acc
                         history_training['best_epoch'] = epoch
                         best_model_wts = copy.deepcopy(model.state_dict())
                 else:
+                    valid_loss = epoch_loss # Register validation loss for Early Stopping
                     if epoch_loss <= min_val_loss:
                         min_val_loss = epoch_loss
                         history_training['best_epoch'] = epoch
@@ -118,7 +121,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
         print("Epoch complete in {:.1f}s\n".format(time.time() - lasttime))
 
         # Check Early Stopping
-        early_stopping(valid_loss, model)
+        early_stopping(valid_loss, valid_acc, model)
 
         if early_stopping.early_stop:
             print("Early stopping")
