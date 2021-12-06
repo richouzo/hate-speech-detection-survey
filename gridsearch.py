@@ -94,9 +94,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
             if key in ['train_loss', 'val_loss', 'train_acc', 'val_acc']:
                 results_dict[key].append(history_training[key][best_epoch])
             elif key == 'epochs':
-                results_dict[key].append(batch_size)
-            elif key == 'batch_size':
                 results_dict[key].append(epochs)
+            elif key == 'batch_size':
+                results_dict[key].append(batch_size)
             else:
                 results_dict[key].append(history_training[key])
 
