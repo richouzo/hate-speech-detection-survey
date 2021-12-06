@@ -48,7 +48,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'epochs': [], 
                     'batch_size': [], 
                     'patience_es': [], 
-                    'use_scheduler': [],
+                    'scheduler_type': [],
                     'patience_lr': [], 
                     'save_condition': [],
                     'best_epoch': [], 
@@ -66,7 +66,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         model_type, optimizer_type, \
         loss_criterion, lr, epochs, \
         batch_size, patience_es, \
-        use_scheduler, patience_lr, \
+        scheduler_type, patience_lr, \
         save_condition = params
 
         if prev_model_type != model_type:
@@ -82,10 +82,10 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         history_training = main(dataloaders, ENGLISH, model_type, optimizer_type, 
-                               loss_criterion, lr, epochs, patience_es, 
+                               loss_criterion, lr, batch_size, epochs, patience_es, 
                                do_save, device, 
                                do_print=False, training_remaining=training_remaining, 
-                               use_scheduler=use_scheduler, patience_lr=patience_lr, 
+                               scheduler_type=scheduler_type, patience_lr=patience_lr, 
                                save_condition=save_condition)
 
         # Save training results to csv

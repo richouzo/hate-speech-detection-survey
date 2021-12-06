@@ -29,21 +29,20 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
     history_training['epochs'] = np.arange(num_epochs)
     history_training['best_epoch'] = num_epochs - 1
     loss_criterion = history_training['loss_criterion']
+    scheduler_type = history_training['scheduler_type']
 
     # Iterate over epochs.
     for epoch in range(num_epochs):
         lasttime = time.time()
         print('Epoch {}/{} | Trainings remaining: {}'.format(epoch, num_epochs - 1, training_remaining))
         print('-' * 10)
+        current_lr = optimizer.state_dict()['param_groups'][0]['lr']
+        print('current lr:', current_lr)
 
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
-                if scheduler is not None and epoch != 0:
-                    scheduler.step(history_training['val_loss'][-1])
-                    current_lr = optimizer.state_dict()['param_groups'][0]['lr']
-                    print('current lr:', current_lr)
             else:
                 model.eval()   # Set model to evaluate mode
 
@@ -76,6 +75,8 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
+                        if scheduler_type == 'linear_schedule_with_warmup':
+                            scheduler.step()
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
@@ -100,6 +101,8 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
             # deep copy the model
             if phase == 'val':
                 valid_loss = epoch_loss # Register validation loss for Early Stopping
+                if scheduler_type == 'reduce_lr_on_plateau' and epoch != 0:
+                    scheduler.step(history_training['val_loss'][-1])
 
                 if save_condition == 'acc':
                     if epoch_acc >= best_val_acc:
