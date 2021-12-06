@@ -73,6 +73,11 @@ def create_fields_dataset(model_type, fix_length=None):
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
         print('pad_index', pad_index)
         field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
+    elif model_type == "DistillBertEmotion":
+        tokenizer = transformers.DistilBertTokenizer.from_pretrained("bhadresh-savani/distilbert-base-uncased-emotion")
+        pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
+        print('pad_index', pad_index)
+        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
     else:
         spacy_en = spacy.load("en_core_web_sm")
         def tokenizer_func(text):
