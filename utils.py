@@ -114,7 +114,7 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
     """
     Plot the confusion matrix after testing.
     """
-    y_pred = [y for y in hist['y_pred']]
+    y_pred = [y for y in hist['y_pred']] 
     y_true = [y for y in hist['y_true']]
 
     nb_classes = len(set(y_true))
