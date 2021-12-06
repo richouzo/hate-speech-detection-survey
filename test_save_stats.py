@@ -16,7 +16,7 @@ def get_highest_lowest_metric_indexes(stats_df, stats_metric='loss', stats_topk=
     return (lowest_stats_df, highest_stats_df)
 
 def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_model_path, loss_criterion, device, only_test=False):
-    from utils import load_model, load_trained_model
+    from utils import load_model, load_trained_model, classif_report
     from train import test_model, test_model_and_save_stats
     print()
     print('model_type:', model_type)
@@ -44,6 +44,7 @@ def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_
         history_training = test_model(model=model, history_training=history_training,  
                                       dataloaders=dataloaders)
         stats_df = None
+        classif_report(hist=history_training)
 
     else:
         print("Start test and save stats")
