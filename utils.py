@@ -126,7 +126,7 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
                          columns = [i for i in range(nb_classes)])
     plt.figure(figsize = (10,7))
     cmap = sns.cubehelix_palette(light=1, as_cmap=True)
-    sns.heatmap(df_cm, cmap=cmap, annot=True)
+    sns.heatmap(df_cm, cmap=cmap, annot=True, fmt='.0f')
     plt.title(f"Confusion Matrix for {model_type}")
 
     if do_save:
