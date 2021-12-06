@@ -6,7 +6,7 @@ from transformers import AutoModelForSequenceClassification, DistilBertModel
 from transformers import AutoConfig, AutoModel
 
 class DistillBert(nn.Module):
-    def __init__(self, dropout=0.2, num_classes=2, output_dim=1):
+    def __init__(self, freeze_bert=True, dropout=0.2, num_classes=2, output_dim=1):
         super(DistillBert, self).__init__()
 
         pretrained_model_name = "distilbert-base-uncased"
@@ -23,9 +23,10 @@ class DistillBert(nn.Module):
         self.relu = nn.ReLU()
 
         # Freeze bert layers
-        for name, p in self.named_parameters():
-            if "bert" in name:
-                p.requires_grad = False
+        if freeze_bert:
+            for name, p in self.named_parameters():
+                if "bert" in name:
+                    p.requires_grad = False
 
     def forward(self, x):
         x = x.permute(1, 0)
@@ -43,7 +44,7 @@ class DistillBert(nn.Module):
         return out
 
 class DistillBertEmotion(nn.Module):
-    def __init__(self, dropout=0.2, num_classes=2, output_dim=1):
+    def __init__(self, freeze_bert=True, dropout=0.2, num_classes=2, output_dim=1):
         super(DistillBertEmotion, self).__init__()
 
         pretrained_model_name = "bhadresh-savani/distilbert-base-uncased-emotion"
@@ -60,9 +61,10 @@ class DistillBertEmotion(nn.Module):
         self.relu = nn.ReLU()
 
         # Freeze bert layers
-        for name, p in self.named_parameters():
-            if "bert" in name:
-                p.requires_grad = False
+        if freeze_bert:
+            for name, p in self.named_parameters():
+                if "bert" in name:
+                    p.requires_grad = False
 
     def forward(self, x):
         x = x.permute(1, 0)
