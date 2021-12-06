@@ -40,6 +40,10 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
+                if scheduler is not None and epoch != 0:
+                    scheduler.step(history_training['val_loss'][-1])
+                    current_lr = optimizer.state_dict()['param_groups'][0]['lr']
+                    print('current lr:', current_lr)
             else:
                 model.eval()   # Set model to evaluate mode
 
@@ -83,8 +87,6 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
                 labels_list += labels.tolist()
 
             pbar.close()
-            if phase == 'train' and scheduler != None and epoch != 0:
-                scheduler.step(history_training['val_loss'][-1])
 
             epoch_loss = running_loss / length_phase
             epoch_acc = f1_score(labels_list, preds_list)

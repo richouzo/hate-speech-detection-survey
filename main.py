@@ -16,8 +16,10 @@ from train import train_model, test_model
 
 from utils import load_model, save_model, plot_training, plot_cm, classif_report
 
-def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc', fix_length=None):
+def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
+         epochs, patience_es, do_save, device, do_print=False, 
+         use_scheduler=False, patience_lr=5, 
+         training_remaining=1, save_condition='acc', fix_length=None):
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -25,6 +27,9 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print('learning rate:', lr)
     print('epochs:', epochs)
     print('patience_es:', patience_es)
+    print('use_scheduler:', use_scheduler)
+    print('patience_lr:', patience_lr)
+    print('save_condition:', save_condition)
     print()
 
     # Instanciate model 
@@ -52,6 +57,12 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
     print('Optimizer used: {}'.format(optimizer))
 
+    if use_scheduler:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=patience_lr)
+    else:
+        scheduler = None
+
+    print('Scheduler used: {}'.format(scheduler))
 
     ### Define dictionary for training info ###
     history_training = {'train_loss': [],
@@ -63,13 +74,17 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
                         'loss_criterion': loss_criterion,
                         'lr': lr,
                         'epochs': epochs,
-                        'patience_es': patience_es}
+                        'patience_es': patience_es,
+                        'use_scheduler': use_scheduler,
+                        'patience_lr': patience_lr,
+                        'save_condition': save_condition}
 
 
     ### Training phase ###
     model, history_training = train_model(model, criterion, optimizer, 
                                           dataloaders, history_training, 
                                           num_epochs=epochs, patience_es=patience_es, 
+                                          scheduler=scheduler, 
                                           training_remaining=training_remaining, 
                                           save_condition=save_condition)
 
@@ -117,6 +132,8 @@ if __name__ == '__main__':
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
     parser.add_argument("--patience_es", default=5, help="nb epochs before early stopping", type=int)
+    parser.add_argument("--patience_lr", default=5, help="nb epochs before lr scheduler", type=int)
+    parser.add_argument("--use_scheduler", default=0, help="use lr scheduler", type=int)
     parser.add_argument("--do_save", default=1, help="1 for saving stats and figures, else 0", type=int)
     parser.add_argument("--save_condition", help="save model with"+\
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
@@ -134,6 +151,8 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     epochs = args.epochs
     patience_es = args.patience_es
+    patience_lr = args.patience_lr
+    use_scheduler = args.use_scheduler
     lr = args.lr
     optimizer_type = args.optimizer_type
     loss_criterion = args.loss_criterion
@@ -154,4 +173,5 @@ if __name__ == '__main__':
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
     main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, fix_length=fix_length)
+         epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, 
+         use_scheduler=use_scheduler, patience_lr=patience_lr, fix_length=fix_length)
