@@ -36,15 +36,15 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
         criterion = nn.BCELoss()
     elif loss_criterion == 'bcelosswithlogits':
         criterion = nn.BCEWithLogitsLoss()
-    elif loss_criterion == 'crossentropy':
+    elif loss_criterion == cross entropy 
         criterion = nn.CrossEntropyLoss()
     else: # Default to BCEWithLogitsLoss
         criterion = nn.BCEWithLogitsLoss()
 
     print('Loss used: {}'.format(criterion))
 
-    if optimizer_type == 'adam':
-        optimizer = optim.Adam(model.parameters(), lr=lr)
+    if optimizer_type == 'adamw':
+        optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1)
     elif optimizer_type == 'sgd':
         optimizer = optim.SGD(model.parameters(), lr=lr)
     else: # Default to Adam

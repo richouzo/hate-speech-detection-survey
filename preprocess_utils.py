@@ -7,12 +7,16 @@ from torchtext.legacy.data import Field, LabelField, TabularDataset, BucketItera
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
 
+import nltk
+nltk.download('stopwords')
+
 import spacy
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
 import transformers
+
 
 def format_training_file(text_file):
     tweets = []
@@ -72,7 +76,8 @@ def create_fields_dataset(model_type, fix_length=None):
         spacy_en = spacy.load("en_core_web_sm")
         def tokenizer(text):
             return [tok.text for tok in spacy_en.tokenizer(text)]
-        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True, fix_length=fix_length)
+        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True, fix_length=fix_length,
+                      stop_words = nltk.corpus.stopwords.words('english'))
 
     label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
     fields = [('text', field), ('label', label)]
