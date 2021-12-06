@@ -36,7 +36,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
         criterion = nn.BCELoss()
     elif loss_criterion == 'bcelosswithlogits':
         criterion = nn.BCEWithLogitsLoss()
-    elif loss_criterion == 'crossentropy' 
+    elif loss_criterion == 'crossentropy':
         criterion = nn.CrossEntropyLoss()
     else: # Default to BCEWithLogitsLoss
         criterion = nn.BCEWithLogitsLoss()
