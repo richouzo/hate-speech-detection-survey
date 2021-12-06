@@ -9,7 +9,7 @@ from utils import STATS_CSV
 
 def get_highest_lowest_metric_indexes(stats_df, stats_metric='loss', stats_topk=5):
     assert stats_metric in ['prob', 'loss']
-    sorted_stats_df = final_stats_df.sort_values(by=[stats_metric])
+    sorted_stats_df = stats_df.sort_values(by=[stats_metric])
     lowest_stats_df = sorted_stats_df[:stats_topk]
     highest_stats_df = sorted_stats_df[-stats_topk:][::-1]
 
