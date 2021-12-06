@@ -75,7 +75,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
 
     ### Testing ###
-    history_training = test_model(model=model, history_training=history_training, criterion=criterion, 
+    history_training = test_model(model=model, history_training=history_training, 
                                   dataloaders=dataloaders)
 
     end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
+    field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 

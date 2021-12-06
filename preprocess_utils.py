@@ -67,6 +67,7 @@ def test_tocsv(tweets_test, y_test):
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
 def create_fields_dataset(model_type, fix_length=None):
+    tokenizer = None
     if model_type == "DistillBert":
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
@@ -74,9 +75,10 @@ def create_fields_dataset(model_type, fix_length=None):
         field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
     else:
         spacy_en = spacy.load("en_core_web_sm")
-        def tokenizer(text):
+        def tokenizer_func(text):
             return [tok.text for tok in spacy_en.tokenizer(text)]
-        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer, lower=True, fix_length=fix_length,
+
+        field = Field(sequential=True, use_vocab=True, tokenize=tokenizer_func, lower=True, fix_length=fix_length,
                       stop_words = nltk.corpus.stopwords.words('english'))
 
     label = LabelField(dtype=torch.long, batch_first=True, sequential=False)
@@ -99,7 +101,7 @@ def create_fields_dataset(model_type, fix_length=None):
         skip_header=True,
     )
 
-    return (field, label, train_data, val_data, test_data)
+    return (field, tokenizer, label, train_data, val_data, test_data)
 
 #Create train and test iterators to use during the training loop
 def create_iterators(train_data, test_data, batch_size, dev, shuffle=False):
@@ -126,7 +128,7 @@ def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_
     test_tocsv(tweets_test, y_test)
     print("data split into train/val/test")
 
-    field, label, train_data, val_data, test_data = create_fields_dataset(model_type, fix_length)
+    field, tokenizer, label, train_data, val_data, test_data = create_fields_dataset(model_type, fix_length)
 
     # build vocabularies using training set
     print("fields and dataset object created")
@@ -134,7 +136,7 @@ def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_
     label.build_vocab(train_data)
     print("vocabulary built..")
 
-    return (field, train_data, val_data, test_data)
+    return (field, tokenizer, train_data, val_data, test_data)
 
 def get_dataloaders(train_data, val_data, test_data, batch_size, device):
     train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)

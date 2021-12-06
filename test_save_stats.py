@@ -15,7 +15,9 @@ def get_highest_lowest_metric_indexes(stats_df, stats_metric='loss', stats_topk=
 
     return (lowest_stats_df, highest_stats_df)
 
-def main_test(dataloaders, phase, field, model_type, csv_path, saved_model_path, loss_criterion, device):
+def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_model_path, loss_criterion, device, only_test=False):
+    from utils import load_model, load_trained_model
+    from train import test_model, test_model_and_save_stats
     print()
     print('model_type:', model_type)
     print('loss_criterion:', loss_criterion)
@@ -35,13 +37,20 @@ def main_test(dataloaders, phase, field, model_type, csv_path, saved_model_path,
                   'prob': [], 
                   'loss': []}
 
-    ### Testing ###
-    stats_dict = test_model_and_save_stats(model=model, loss_criterion=loss_criterion, dataloaders=dataloaders, 
-                                           phase=phase, field=field, stats_dict=stats_dict)
+    if only_test:
+        print("Start test only")
+        history_training = {'model_type': model_type,
+                            'loss_criterion': loss_criterion}
+        history_training = test_model(model=model, history_training=history_training,  
+                                      dataloaders=dataloaders)
+        stats_df = None
 
-    stats_df = pd.DataFrame(data=stats_dict).reset_index(drop=True)
-
-    stats_df.to_csv(csv_path)
+    else:
+        print("Start test and save stats")
+        stats_dict = test_model_and_save_stats(model=model, model_type=model_type, loss_criterion=loss_criterion, dataloaders=dataloaders, 
+                                               phase=phase, field=field, tokenizer=tokenizer, stats_dict=stats_dict)
+        stats_df = pd.DataFrame(data=stats_dict).reset_index(drop=True)
+        stats_df.to_csv(csv_path)
 
     return stats_df
 
@@ -55,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument("--saved_model_path", help="path to trained model", default='saved_models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--device", default='', help="cpu or cuda for gpu")
+    parser.add_argument("--only_test", default=0, help="debug test")
     parser.add_argument("--stats_metric", default='loss', help="metric to retrieve stats")
     parser.add_argument("--stats_topk", default=5, help="topk indexes to retrieve", type=int)
     parser.add_argument("--stats_label", default=0, help="label indexes to retrieve", type=int)
@@ -83,20 +93,17 @@ if __name__ == '__main__':
     print("model_id:", model_id)
 
     # Stats parameters
+    only_test = args.only_test
     stats_metric = args.stats_metric
     stats_topk = args.stats_topk
     stats_label = args.stats_label
 
     csv_path = STATS_CSV+'stats_{}_{}_{}_{}.csv'.format(model_type, model_id, phase, loss_criterion)
 
-    if not os.path.exists(csv_path):
-        print("Stats csv does not exist yet, starting the test pipeline...")
-
-        import spacy
+    if not os.path.exists(csv_path) or only_test:
+        print("Starting the test pipeline...")
         import torch
         from preprocess_utils import get_datasets, get_dataloaders
-        from train import test_model_and_save_stats
-        from utils import load_model, load_trained_model
 
         if args.device in ['cuda', 'cpu']:
             device = args.device
@@ -104,25 +111,26 @@ if __name__ == '__main__':
             device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         print("Device:", device)
 
-        field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
+        field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
-        stats_df = main_test(dataloaders, phase, field, model_type, csv_path, 
-                              saved_model_path, loss_criterion, device)
+        stats_df = main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, 
+                             saved_model_path, loss_criterion, device, only_test)
 
     else:
         print("Stats csv already exists, retrieving csv...")
         stats_df = pd.read_csv(csv_path, index_col=0)
 
 
-    # Get indexes
-    final_stats_df = stats_df[stats_df['true_label'] == stats_label].reset_index(drop=True)
+    if stats_df is not None:
+        # Get indexes
+        final_stats_df = stats_df[stats_df['true_label'] == stats_label].reset_index(drop=True)
 
-    lowest_stats_df, highest_stats_df = get_highest_lowest_metric_indexes(final_stats_df, 
-                                                                          stats_metric=stats_metric, 
-                                                                          stats_topk=stats_topk)
-    print('lowest_stats_df')
-    print(lowest_stats_df)
-    print('highest_stats_df')
-    print(highest_stats_df)
+        lowest_stats_df, highest_stats_df = get_highest_lowest_metric_indexes(final_stats_df, 
+                                                                              stats_metric=stats_metric, 
+                                                                              stats_topk=stats_topk)
+        print('lowest_stats_df')
+        print(lowest_stats_df)
+        print('highest_stats_df')
+        print(highest_stats_df)
 

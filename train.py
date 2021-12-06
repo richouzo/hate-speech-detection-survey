@@ -132,7 +132,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
 
     return (model, history_training)
 
-def test_model(model, history_training, criterion, dataloaders):
+def test_model(model, history_training, dataloaders):
     """
     Testing function. 
     Print the loss and accuracy after the inference on the testset.
@@ -151,6 +151,14 @@ def test_model(model, history_training, criterion, dataloaders):
     nb_batches = len(dataloaders[phase])
     length_phase = len(dataloaders[phase].dataset)
     loss_criterion = history_training['loss_criterion']
+    if loss_criterion == 'bceloss':
+        criterion = nn.BCELoss()
+    elif loss_criterion == 'bcelosswithlogits':
+        criterion = nn.BCEWithLogitsLoss()
+    elif loss_criterion == 'crossentropy':
+        criterion = nn.CrossEntropyLoss()
+    else: # Default to BCEWithLogitsLoss
+        criterion = nn.BCEWithLogitsLoss()
 
     pbar = tqdm.tqdm([i for i in range(nb_batches)])
 
@@ -191,7 +199,7 @@ def test_model(model, history_training, criterion, dataloaders):
 
     return history_training
 
-def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, stats_dict):
+def test_model_and_save_stats(model, model_type, loss_criterion, dataloaders, phase, field, tokenizer, stats_dict):
     """
     Testing function and save stats on the testset.
     """
@@ -217,7 +225,6 @@ def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, 
 
     nb_batches = len(dataloaders[phase])
     length_phase = len(dataloaders[phase].dataset)
-
     assert nb_batches == length_phase, "Batch size has to be equal to 1"
 
     pbar = tqdm.tqdm([i for i in range(nb_batches)])
@@ -247,10 +254,14 @@ def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, 
         # save to stats_dict
         stats_dict['original_index'].append(batch_idx)
 
-        text = ""
-        list_tokens = list(inputs.squeeze(0).detach())
-        for i in range(len(list_tokens)):
-            text += field.vocab.itos[list_tokens[i]] + " "
+        list_tokens = list(inputs.squeeze(0).detach().cpu())
+        list_tokens = [int(tok) for tok in list_tokens]
+        if model_type == 'DistillBert' and tokenizer is not None:
+            text = tokenizer.decode(list_tokens)
+        else:
+            text = ""
+            for i in range(len(list_tokens)):
+                text += str(field.vocab.itos[list_tokens[i]]) + " "
         stats_dict['text'].append(text)
 
         stats_dict['true_label'].append(int(labels[0]))
@@ -258,8 +269,11 @@ def test_model_and_save_stats(model, loss_criterion, dataloaders, phase, field, 
 
         if loss_criterion in ['bcelosswithlogits']:
             prob = float(torch.sigmoid(outputs[0]).detach().cpu())
-        else:
+        elif loss_criterion in ['bceloss']:
             prob = float(outputs[0].detach().cpu())
+        else:
+            softmax = nn.Softmax(dim=1)
+            prob = float(softmax(outputs)[0][1].detach().cpu())
         stats_dict['prob'].append(prob)
 
         stats_dict['loss'].append(loss.item())

@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+    field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
 
     vocab_stoi, vocab_itos = get_vocab_stoi_itos(field)
 
