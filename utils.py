@@ -100,10 +100,12 @@ def classif_report(hist, list_names=[]):
     nb_classes = len(set(y_true))
 
     accuracy = round(accuracy_score(y_true, y_pred)*100, 3)
-    f1score = round(f1_score(y_true, y_pred)*100, 3)
+    macro_f1score = round(f1_score(y_true, y_pred, average='macro')*100, 3)
+    binary_f1score = round(f1_score(y_true, y_pred, average='binary')*100, 3)
     mse = round(mean_squared_error(y_true, y_pred), 3)
     print(f'Accuracy: {accuracy}%')
-    print(f'F1-score: {f1score}%')
+    print(f'Macro F1-score: {macro_f1score}%')
+    print(f'Binary F1-score: {binary_f1score}%')
     print(f'MSE: {mse}')
     target_names = list_names if list_names else [f'class {i}' for i in range(nb_classes)]
     print(classification_report(y_true, y_pred, target_names=target_names))
