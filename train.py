@@ -89,7 +89,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
             pbar.close()
 
             epoch_loss = running_loss / length_phase
-            epoch_acc = f1_score(labels_list, preds_list)
+            epoch_acc = f1_score(labels_list, preds_list, average='macro')
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))            
@@ -189,7 +189,7 @@ def test_model(model, history_training, dataloaders):
     pbar.close()
 
     test_loss = running_loss / length_phase
-    test_acc = f1_score(labels_list, preds_list)
+    test_acc = f1_score(labels_list, preds_list, average='macro')
     test_acc = round(float(test_acc), 4)
     history_training['test_acc'] = test_acc
 
@@ -283,7 +283,7 @@ def test_model_and_save_stats(model, model_type, loss_criterion, dataloaders, ph
     pbar.close()
 
     test_loss = running_loss / length_phase
-    test_acc = f1_score(labels_list, preds_list)
+    test_acc = f1_score(labels_list, preds_list, average='macro')
     test_acc = round(float(test_acc), 4)
 
     print('\nTest stats -  Loss: {:.4f} Acc: {:.2f}%'.format(test_loss, test_acc*100))
