@@ -48,6 +48,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'epochs': [], 
                     'batch_size': [], 
                     'patience_es': [], 
+                    'use_scheduler': [],
+                    'patience_lr': [], 
+                    'save_condition': [],
                     'best_epoch': [], 
                     'train_loss': [], 
                     'val_loss': [], 
@@ -62,7 +65,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         # /!\ Has to be in the same order as in the config.yaml file /!\ #
         model_type, optimizer_type, \
         loss_criterion, lr, epochs, \
-        batch_size, patience_es = params
+        batch_size, patience_es, \
+        use_scheduler, patience_lr, \
+        save_condition = params
 
         if prev_model_type != model_type:
             print("prev_model_type", prev_model_type)
@@ -79,7 +84,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         history_training = main(dataloaders, ENGLISH, model_type, optimizer_type, 
                                loss_criterion, lr, epochs, patience_es, 
                                do_save, device, 
-                               do_print=False, training_remaining=training_remaining)
+                               do_print=False, training_remaining=training_remaining, 
+                               use_scheduler=use_scheduler, patience_lr=patience_lr, 
+                               save_condition=save_condition)
 
         # Save training results to csv
         best_epoch = history_training['best_epoch']
