@@ -27,11 +27,16 @@ def load_model(model_type, field, device, fix_length=None):
     if model_type == 'BasicLSTM':
         model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
+
     elif model_type == 'BiLSTM':
         model = BiLSTM.BiLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
+
     elif model_type == 'DistillBert':
         model = Transformers.DistillBert()
+
+    elif model_type == 'DistillBertEmotion':
+        model = Transformers.DistillBertEmotion()
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
