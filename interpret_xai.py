@@ -62,7 +62,6 @@ def batch_model_explainability(model, vocab_stoi, vocab_itos, dataloaders, field
             #print(output)
             interpret_sentence(model, field, inputs, vocab_stoi, vocab_itos, 
                                device, vis_data_records_ig, token_reference, lig, min_len = 7, label = labels)
-            print('ok')
         # break
 
     pbar.close()
@@ -79,8 +78,8 @@ def interpret_sentence(model, field, inputs, vocab_stoi, vocab_itos, device, vis
     # PAD_IND = vocab_stoi[field.pad_token]
     indexed = [int(inputs[i,0]) for i in range(inputs.shape[0])]
     if len(indexed) < min_len :
-        indexed +=[field.pad_token] * (min_len - len(indexed))
-    # print("indexed", indexed)
+        indexed +=[vocab_stoi[field.pad_token]] * (min_len - len(indexed))
+    print("indexed", indexed)
     sentence = convert_token_to_str(indexed, vocab_stoi, vocab_itos)
     # print("sentence", sentence)
     text = [vocab_itos[tok] for tok in indexed]
@@ -113,7 +112,6 @@ def interpret_sentence(model, field, inputs, vocab_stoi, vocab_itos, device, vis
     # compute attributions and approximation delta using layer integrated gradients
     attributions_ig, delta = lig.attribute(input_indices, reference_indices, \
                                            n_steps=500, return_convergence_delta=True)
-    # print("ok lig")
 
     class_names = ["Neutral","Hate"]
 
@@ -186,7 +184,7 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+    field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
 
     vocab_stoi, vocab_itos = get_vocab_stoi_itos(field)
 

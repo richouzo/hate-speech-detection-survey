@@ -12,20 +12,22 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
-
-from models import BasicLSTM, BiLSTM, Transformers, AutoTransformer
+ 
+from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
 GRIDSEARCH_CSV = "gridsearch_results/"
+STATS_CSV = "stats_results/"
 
-def load_model(model_type, field, device):
+def load_model(model_type, field, device, fix_length=None):
     """
     Load and return model.
     """
     if model_type == 'BasicLSTM':
         model = BasicLSTM.BasicLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
+
     elif model_type == 'BiLSTM':
         model = BiLSTM.BiLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
@@ -35,6 +37,19 @@ def load_model(model_type, field, device):
     elif model_type == 'AutoTransformer':
         model = AutoTransformer.AutoTransformer(dim_emb=128, num_words=field.vocab.__len__(), 
                                           hidden_dim=128, num_layers=2, output_dim=1, hidden_dropout_prob = 0.5)
+    elif model_type == 'DistillBert':
+        model = Transformers.DistillBert()
+
+    elif model_type == 'DistillBertEmotion':
+        model = Transformers.DistillBertEmotion()
+
+    elif model_type == 'HybridCNNLSTM':
+	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
+        
+    elif model_type == 'HybridLSTMCNN':
+	      model = Hybrid_LSTM_CNN.HybridLSTMCNN(fix_length=fix_length)
+        
+
     else:
         model = None
     model.to(device)
@@ -91,10 +106,12 @@ def classif_report(hist, list_names=[]):
     nb_classes = len(set(y_true))
 
     accuracy = round(accuracy_score(y_true, y_pred)*100, 3)
-    f1score = round(f1_score(y_true, y_pred)*100, 3)
+    macro_f1score = round(f1_score(y_true, y_pred, average='macro')*100, 3)
+    binary_f1score = round(f1_score(y_true, y_pred, average='binary')*100, 3)
     mse = round(mean_squared_error(y_true, y_pred), 3)
     print(f'Accuracy: {accuracy}%')
-    print(f'F1-score: {f1score}%')
+    print(f'Macro F1-score: {macro_f1score}%')
+    print(f'Binary F1-score: {binary_f1score}%')
     print(f'MSE: {mse}')
     target_names = list_names if list_names else [f'class {i}' for i in range(nb_classes)]
     print(classification_report(y_true, y_pred, target_names=target_names))
@@ -115,7 +132,7 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
                          columns = [i for i in range(nb_classes)])
     plt.figure(figsize = (10,7))
     cmap = sns.cubehelix_palette(light=1, as_cmap=True)
-    sns.heatmap(df_cm, cmap=cmap, annot=True)
+    sns.heatmap(df_cm, cmap=cmap, annot=True, fmt='.0f')
     plt.title(f"Confusion Matrix for {model_type}")
 
     if do_save:
@@ -126,7 +143,7 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
 # From https://github.com/Bjarten/early-stopping-pytorch
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
-    def __init__(self, patience=7, verbose=False, delta=0, path=SAVED_MODELS_PATH+'checkpoint.pt'):
+    def __init__(self, patience=7, verbose=False, delta=0, save_condition='loss', path=SAVED_MODELS_PATH+'checkpoint.pt'):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -143,17 +160,21 @@ class EarlyStopping:
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
+        self.score_min = np.Inf
         self.delta = delta
         self.path = path
+        self.save_condition = save_condition
+        assert self.save_condition in ['acc', 'loss']
 
-    def __call__(self, val_loss, model):
-
-        score = -val_loss
+    def __call__(self, val_loss, val_acc, model):
+        if self.save_condition == 'loss':
+            score = -val_loss
+        elif self.save_condition == 'acc':
+            score = val_acc
 
         if self.best_score is None:
             self.best_score = score
-            self.save_checkpoint(val_loss, model)
+            self.save_checkpoint(val_loss, val_acc, model)
         elif score < self.best_score + self.delta:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
@@ -161,12 +182,15 @@ class EarlyStopping:
                 self.early_stop = True
         else:
             self.best_score = score
-            self.save_checkpoint(val_loss, model)
+            self.save_checkpoint(val_loss, val_acc, model)
             self.counter = 0
 
-    def save_checkpoint(self, val_loss, model):
+    def save_checkpoint(self, val_loss, val_acc, model):
         '''Saves model when validation loss decrease.'''
         if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+            if self.save_condition == 'loss':
+                print(f'Validation loss decreased ({self.score_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+            elif self.save_condition == 'acc':
+                print(f'Validation acc increased ({self.score_min:.6f} --> {val_acc:.6f}).  Saving model ...')
         torch.save(model.state_dict(), self.path)
-        self.val_loss_min = val_loss
+        self.score_min = val_loss

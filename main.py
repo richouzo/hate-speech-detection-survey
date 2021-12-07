@@ -16,8 +16,10 @@ from train import train_model, test_model
 
 from utils import load_model, save_model, plot_training, plot_cm, classif_report
 
-def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=False, training_remaining=1, save_condition='acc'):
+def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
+         batch_size, epochs, patience_es, do_save, device, do_print=False, 
+         scheduler_type='', patience_lr=5,  
+         training_remaining=1, save_condition='acc', fix_length=None):
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -25,10 +27,15 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print('learning rate:', lr)
     print('epochs:', epochs)
     print('patience_es:', patience_es)
+    print('scheduler_type:', scheduler_type)
+    print('patience_lr:', patience_lr)
+    print('save_condition:', save_condition)
     print()
 
+
     # Instantiate model 
-    model = load_model(model_type, field, device)
+    model = load_model(model_type, field, device, fix_length=fix_length)
+
 
     print("Model {} loaded on {}".format(model_type, device))
 
@@ -43,8 +50,8 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
     print('Loss used: {}'.format(criterion))
 
-    if optimizer_type == 'adam':
-        optimizer = optim.Adam(model.parameters(), lr=lr)
+    if optimizer_type == 'adamw':
+        optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1)
     elif optimizer_type == 'sgd':
         optimizer = optim.SGD(model.parameters(), lr=lr)
     else: # Default to Adam
@@ -52,6 +59,17 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
     print('Optimizer used: {}'.format(optimizer))
 
+    if scheduler_type == 'reduce_lr_on_plateau':
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=patience_lr)
+    elif scheduler_type == 'linear_schedule_with_warmup':
+        import transformers
+        num_training_steps = round(batch_size*epochs)
+        num_warmup_steps = round(0.1*num_training_steps)
+        scheduler = transformers.get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps)
+    else:
+        scheduler = None
+
+    print('Scheduler used: {}'.format(scheduler))
 
     ### Define dictionary for training info ###
     history_training = {'train_loss': [],
@@ -63,19 +81,23 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
                         'loss_criterion': loss_criterion,
                         'lr': lr,
                         'epochs': epochs,
-                        'patience_es': patience_es}
+                        'patience_es': patience_es,
+                        'scheduler_type': scheduler_type,
+                        'patience_lr': patience_lr,
+                        'save_condition': save_condition}
 
 
     ### Training phase ###
     model, history_training = train_model(model, criterion, optimizer, 
                                           dataloaders, history_training, 
                                           num_epochs=epochs, patience_es=patience_es, 
+                                          scheduler=scheduler, 
                                           training_remaining=training_remaining, 
                                           save_condition=save_condition)
 
 
     ### Testing ###
-    history_training = test_model(model=model, history_training=history_training, criterion=criterion, 
+    history_training = test_model(model=model, history_training=history_training, 
                                   dataloaders=dataloaders)
 
     end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -116,11 +138,14 @@ if __name__ == '__main__':
     parser.add_argument("--optimizer_type", help="optimizer: adam, sgd", default='adam')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--epochs", default=10, help="cpu or cuda for gpu", type=int)
-    parser.add_argument("--patience_es", default=2, help="nb epochs before early stopping", type=int)
+    parser.add_argument("--patience_es", default=5, help="nb epochs before early stopping", type=int)
+    parser.add_argument("--patience_lr", default=5, help="nb epochs before lr scheduler", type=int)
+    parser.add_argument("--scheduler_type", default='', help="reduce_lr_on_plateau, linear_schedule_with_warmup")
     parser.add_argument("--do_save", default=1, help="1 for saving stats and figures, else 0", type=int)
     parser.add_argument("--save_condition", help="save model with"+\
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
     parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
+    parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
 
     args = parser.parse_args()
 
@@ -133,12 +158,15 @@ if __name__ == '__main__':
     batch_size = args.batch_size
     epochs = args.epochs
     patience_es = args.patience_es
+    patience_lr = args.patience_lr
+    scheduler_type = args.scheduler_type
     lr = args.lr
     optimizer_type = args.optimizer_type
     loss_criterion = args.loss_criterion
     model_type = args.model
     do_save = args.do_save
     save_condition = args.save_condition
+    fix_length = args.fix_length
 
     if args.device in ['cuda', 'cpu']:
         device = args.device
@@ -147,9 +175,10 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    field, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data)
+    field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
     main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
-         epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition)
+         batch_size, epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, 
+         scheduler_type=scheduler_type, patience_lr=patience_lr, fix_length=fix_length)
