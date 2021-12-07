@@ -32,8 +32,10 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print('save_condition:', save_condition)
     print()
 
-    # Instanciate model 
+
+    # Instantiate model 
     model = load_model(model_type, field, device, fix_length=fix_length)
+
 
     print("Model {} loaded on {}".format(model_type, device))
 

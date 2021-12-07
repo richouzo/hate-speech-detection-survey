@@ -12,8 +12,8 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
-
-from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN
+ 
+from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
@@ -31,7 +31,12 @@ def load_model(model_type, field, device, fix_length=None):
     elif model_type == 'BiLSTM':
         model = BiLSTM.BiLSTM(dim_emb=300, num_words=field.vocab.__len__(), 
                                     hidden_dim=128, num_layers=2, output_dim=1)
-
+    elif model_type == 'Transformers':
+        model = Transformers.Transformers(dim_emb=128, num_words=field.vocab.__len__(), 
+                                          hidden_dim=128, num_layers=2, output_dim=1)
+    elif model_type == 'AutoTransformer':
+        model = AutoTransformer.AutoTransformer(dim_emb=128, num_words=field.vocab.__len__(), 
+                                          hidden_dim=128, num_layers=2, output_dim=1, hidden_dropout_prob = 0.5)
     elif model_type == 'DistillBert':
         model = Transformers.DistillBert()
 
@@ -44,6 +49,7 @@ def load_model(model_type, field, device, fix_length=None):
     elif model_type == 'HybridLSTMCNN':
 	      model = Hybrid_LSTM_CNN.HybridLSTMCNN(fix_length=fix_length)
         
+
     else:
         model = None
     model.to(device)
