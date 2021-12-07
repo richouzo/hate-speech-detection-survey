@@ -27,7 +27,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     print('patience_es:', patience_es)
     print()
 
-    # Instanciate model 
+    # Instantiate model 
     model = load_model(model_type, field, device)
 
     print("Model {} loaded on {}".format(model_type, device))
