@@ -1,0 +1,11 @@
+hyperparameters:
+  model_type: ['DistillBert']
+  optimizer_type: ['adam']
+  loss_criterion: ['crossentropy']
+  lr: [0.00002]
+  epochs: [100]
+  batch_size: [64]
+  patience_es: [10]
+  scheduler_type: ['linear_schedule_with_warmup']
+  patience_lr: [5]
+  save_condition: ['loss']

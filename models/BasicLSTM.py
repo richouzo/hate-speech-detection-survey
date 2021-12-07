@@ -31,4 +31,4 @@ class BasicLSTM(nn.Module):
 
         #we retrive the last hidden node in the lstm and use it to predict the class using a sigmoid
         #the training uses binary cross entropy so model output should be float value between 0 and 1
-        return torch.sigmoid(self.lin(torch.tanh(lstm_hidden))).view(-1)
+        return self.lin(torch.tanh(lstm_hidden)).view(-1)

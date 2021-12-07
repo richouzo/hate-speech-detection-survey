@@ -9,3 +9,7 @@ seaborn
 nltk
 spacy
 torchtext
+PyYAML
+transformers
+captum
+emoji
