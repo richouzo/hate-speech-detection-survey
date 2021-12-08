@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN
+from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, PyramidCNN
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
@@ -37,6 +37,9 @@ def load_model(model_type, field, device, fix_length=None):
 
     elif model_type == 'DistillBertEmotion':
         model = Transformers.DistillBertEmotion()
+
+    elif model_type == 'PyramidCNN':
+        model = PyramidCNN.PyramidCNN(num_words=field.vocab.__len__())
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
