@@ -19,7 +19,8 @@ from utils import load_model, save_model, plot_training, plot_cm, classif_report
 def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 
          scheduler_type='', patience_lr=5,  
-         training_remaining=1, save_condition='acc', fix_length=None):
+         training_remaining=1, save_condition='acc', fix_length=None,
+         context_size=1, pyramid=[128,128], fcs=[128],batch_norm=0, alpha=0.2):
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -34,7 +35,9 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
 
 
     # Instantiate model 
-    model = load_model(model_type, field, device, fix_length=fix_length)
+    model = load_model(model_type, field, device, fix_length=fix_length,
+            context_size=context_size, pyramid=pyramid, fcs=fcs,
+            batch_norm=batch_norm, alpha=alpha)
 
 
     print("Model {} loaded on {}".format(model_type, device))

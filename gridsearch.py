@@ -64,7 +64,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         loss_criterion, lr, epochs, \
         batch_size, patience_es, \
         scheduler_type, patience_lr, \
-        save_condition, fix_length = params
+        save_condition, fix_length, context_size, pyramid, fcs, batch_norm, alpha = params
 
         if prev_model_type != model_type:
             print("prev_model_type", prev_model_type)
@@ -77,6 +77,13 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
 
         print('fix_length:', fix_length)
         print('batch_size:', batch_size)
+        
+        if model_type == 'PyramidCNN':
+            print('context_size:', context_size)
+            print('pyramid:', pyramid)
+            print('fcs:', fcs)
+            print('batch_norm:', batch_norm)
+            print('alpha:', alpha)
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         history_training = main(dataloaders, ENGLISH, model_type, optimizer_type, 
@@ -84,7 +91,9 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                                do_save, device, 
                                do_print=False, training_remaining=training_remaining, 
                                scheduler_type=scheduler_type, patience_lr=patience_lr, 
-                               save_condition=save_condition, fix_length=fix_length)
+                               save_condition=save_condition, fix_length=fix_length, 
+                               context_size=context_size, pyramid=pyramid, fcs=fcs,
+                               batch_norm=batch_norm, alpha=alpha)
 
         # Save training results to csv
         best_epoch = history_training['best_epoch']
