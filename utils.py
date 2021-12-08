@@ -13,14 +13,14 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
  
-from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer
+from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer, PyramidCNN
 
 SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
 GRIDSEARCH_CSV = "gridsearch_results/"
 STATS_CSV = "stats_results/"
 
-def load_model(model_type, field, device, fix_length=None):
+def load_model(model_type, field, device, context_size, pyramid, fcs, batch_norm, alpha, fix_length=None):
     """
     Load and return model.
     """
@@ -42,6 +42,10 @@ def load_model(model_type, field, device, fix_length=None):
 
     elif model_type == 'DistillBertEmotion':
         model = Transformers.DistillBertEmotion()
+
+    elif model_type == 'PyramidCNN':
+        model = PyramidCNN.PyramidCNN(num_words=field.vocab.__len__(),context_size=context_size, 
+                                pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha)
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
