@@ -79,7 +79,7 @@ def train_model(model, criterion, optimizer, dataloaders, history_training,
                             scheduler.step()
 
                 # statistics
-                running_loss += loss.item() * inputs.size(0)
+                running_loss += loss.item() * inputs.size(1)
                 if loss_criterion in ['bceloss', 'bcelosswithlogits']:
                     preds = torch.where(outputs > 0.5, 1, 0).tolist()
                 else:
@@ -167,6 +167,7 @@ def test_model(model, history_training, dataloaders):
         criterion = nn.CrossEntropyLoss()
     else: # Default to BCEWithLogitsLoss
         criterion = nn.BCEWithLogitsLoss()
+    print('Loss used: {}'.format(criterion))
 
     pbar = tqdm.tqdm([i for i in range(nb_batches)])
 
@@ -178,13 +179,12 @@ def test_model(model, history_training, dataloaders):
             labels = labels.float()
 
         # forward
-        # track history if only in train
         with torch.set_grad_enabled(False):
             outputs = model.forward(inputs)
             loss = criterion(outputs, labels)
 
         # statistics
-        running_loss += loss.item() * inputs.size(0)
+        running_loss += loss.item() * inputs.size(1)
         if loss_criterion in ['bceloss', 'bcelosswithlogits']:
             preds = torch.where(outputs > 0.5, 1, 0).tolist()
         else:
@@ -251,7 +251,7 @@ def test_model_and_save_stats(model, model_type, loss_criterion, dataloaders, ph
             loss = criterion(outputs, labels)
 
         # statistics
-        running_loss += loss.item() * inputs.size(0)
+        running_loss += loss.item() * inputs.size(1)
         if loss_criterion in ['bceloss', 'bcelosswithlogits']:
             preds = torch.where(outputs > 0.5, 1, 0).tolist()
         else:
