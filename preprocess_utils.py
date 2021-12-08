@@ -72,12 +72,12 @@ def create_fields_dataset(model_type, fix_length=None):
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
         print('pad_index', pad_index)
-        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
+        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index, fix_length=fix_length)
     elif model_type == "DistillBertEmotion":
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("bhadresh-savani/distilbert-base-uncased-emotion")
         pad_index = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
         print('pad_index', pad_index)
-        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index)
+        field = Field(use_vocab=False, tokenize=tokenizer.encode, pad_token=pad_index, fix_length=fix_length)
     else:
         spacy_en = spacy.load("en_core_web_sm")
         def tokenizer_func(text):
@@ -119,9 +119,13 @@ def create_iterators(train_data, test_data, batch_size, dev, shuffle=False):
         )
     return train_iterator, test_iterator
 
-def get_vocab_stoi_itos(field):
-    vocab_stoi = field.vocab.stoi
-    vocab_itos = field.vocab.itos
+def get_vocab_stoi_itos(field, tokenizer=None):
+    if tokenizer is not None:
+        vocab_stoi = tokenizer.encode
+        vocab_itos = tokenizer.decode
+    else:
+        vocab_stoi = field.vocab.stoi
+        vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
 def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length=None):

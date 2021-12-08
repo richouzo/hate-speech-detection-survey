@@ -6,7 +6,7 @@ from transformers import AutoModelForSequenceClassification, DistilBertModel
 from transformers import AutoConfig, AutoModel
 
 class DistillBert(nn.Module):
-    def __init__(self, freeze_bert=True, dropout=0.2, num_classes=2, output_dim=1):
+    def __init__(self, freeze_bert=False, dropout=0.2, num_classes=2, output_dim=1):
         super(DistillBert, self).__init__()
 
         pretrained_model_name = "distilbert-base-uncased"
@@ -44,7 +44,7 @@ class DistillBert(nn.Module):
         return out
 
 class DistillBertEmotion(nn.Module):
-    def __init__(self, freeze_bert=True, dropout=0.2, num_classes=2, output_dim=1):
+    def __init__(self, freeze_bert=False, dropout=0.2, num_classes=2, output_dim=1):
         super(DistillBertEmotion, self).__init__()
 
         pretrained_model_name = "bhadresh-savani/distilbert-base-uncased-emotion"

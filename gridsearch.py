@@ -28,12 +28,7 @@ def get_gridsearch_config(config_path):
     return all_config_list
 
 def gridsearch(config_path, training_data, testset_data, test_labels_data, do_save, device):
-
     all_config_list = get_gridsearch_config(config_path)
-
-    model_type = all_config_list[0][0]
-    prev_model_type = model_type
-    ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type)
 
     training_remaining = np.prod([len(config) for config in all_config_list])
     print('Training to do:', training_remaining)
@@ -51,6 +46,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'scheduler_type': [],
                     'patience_lr': [], 
                     'save_condition': [],
+                    'fix_length': [],
                     'best_epoch': [], 
                     'train_loss': [], 
                     'val_loss': [], 
@@ -60,6 +56,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'end_time': []}
 
     # Start gridsearch
+    prev_model_type = None
     start_time = time.time()
     for params in itertools.product(*all_config_list):
         # /!\ Has to be in the same order as in the config.yaml file /!\ #
@@ -67,17 +64,18 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         loss_criterion, lr, epochs, \
         batch_size, patience_es, \
         scheduler_type, patience_lr, \
-        save_condition = params
+        save_condition, fix_length = params
 
         if prev_model_type != model_type:
             print("prev_model_type", prev_model_type)
             print("model_type", model_type)
             print("Changing tokenizer...")
             ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, 
-                                                                    testset_data, test_labels_data, 
-                                                                    model_type)
+                                                                               testset_data, test_labels_data, 
+                                                                               model_type, fix_length)
             prev_model_type = model_type
 
+        print('fix_length:', fix_length)
         print('batch_size:', batch_size)
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
@@ -86,7 +84,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                                do_save, device, 
                                do_print=False, training_remaining=training_remaining, 
                                scheduler_type=scheduler_type, patience_lr=patience_lr, 
-                               save_condition=save_condition)
+                               save_condition=save_condition, fix_length=fix_length)
 
         # Save training results to csv
         best_epoch = history_training['best_epoch']
