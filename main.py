@@ -63,8 +63,11 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=patience_lr)
     elif scheduler_type == 'linear_schedule_with_warmup':
         import transformers
-        num_training_steps = round(batch_size*epochs)
+        train_length = len(dataloaders['train'].dataset)
+        num_training_steps = round((train_length/batch_size)*epochs)
         num_warmup_steps = round(0.1*num_training_steps)
+        print('num_training_steps', num_training_steps)
+        print('num_warmup_steps', num_warmup_steps)
         scheduler = transformers.get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps)
     else:
         scheduler = None
@@ -84,7 +87,8 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
                         'patience_es': patience_es,
                         'scheduler_type': scheduler_type,
                         'patience_lr': patience_lr,
-                        'save_condition': save_condition}
+                        'save_condition': save_condition,
+                        'fix_length': fix_length}
 
 
     ### Training phase ###
