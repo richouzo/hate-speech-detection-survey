@@ -1,4 +1,5 @@
 hyperparameters:
+  # Training
   model_type: ['PyramidCNN']
   optimizer_type: ['adam']
   loss_criterion: ['bcelosswithlogits']
@@ -6,10 +7,18 @@ hyperparameters:
   epochs: [100]
   batch_size: [64]
   patience_es: [5]
+
+  # Scheduler
   scheduler_type: ['']
   patience_lr: [3]
+
+  # Saving condition by acc or loss
   save_condition: ['acc']
+
+  # HybridLSTMCNN
   fix_length: [null]
+
+  # PyramidCNN
   context_size: [0]
   pyramid: [[256,256]]
   fcs: [[128]]
