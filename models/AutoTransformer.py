@@ -39,7 +39,7 @@ class AutoTransformer(nn.Module):
 
         logits = self.act(logits)
         #print(logits.shape)
-        logits = self.classifier(logits)
         logits = self.dropout(logits)
+        logits = self.classifier(logits)
         return logits.view(-1)
 
