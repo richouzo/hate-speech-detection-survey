@@ -39,6 +39,12 @@ def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_
 
     if only_test:
         print("Start test only")
+        # Stats to print
+        total_params = sum(p.numel() for p in model.parameters())
+        trainable_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        print('Total params:', total_params)
+        print('Total trainable params:', trainable_total_params)
+
         history_training = {'model_type': model_type,
                             'loss_criterion': loss_criterion}
         history_training = test_model(model=model, history_training=history_training,  
