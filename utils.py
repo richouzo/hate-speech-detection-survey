@@ -20,7 +20,10 @@ FIGURES_PATH = "figures/"
 GRIDSEARCH_CSV = "gridsearch_results/"
 STATS_CSV = "stats_results/"
 
-def load_model(model_type, field, device, context_size, pyramid, fcs, batch_norm, alpha, fix_length=None):
+def load_model(model_type, field, device, 
+               context_size=0, pyramid=[256, 256], 
+               fcs=[128], batch_norm=0, alpha=0.2, 
+               fix_length=None):
     """
     Load and return model.
     """
@@ -45,7 +48,7 @@ def load_model(model_type, field, device, context_size, pyramid, fcs, batch_norm
 
     elif model_type == 'PyramidCNN':
         model = PyramidCNN.PyramidCNN(num_words=field.vocab.__len__(),context_size=context_size, 
-                                pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha)
+                                      pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha)
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
