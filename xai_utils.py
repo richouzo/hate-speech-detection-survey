@@ -26,7 +26,12 @@ from typing import Any, Iterable, List, Tuple, Union
 from IPython.core.display import HTML, display
 
 
-def model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos, df, max_samples, field, device, class_names=["Neutral","Hate"]):
+"""
+CNN, LSTM models' XAI methods
+"""
+
+def model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos, 
+                         df, max_samples, field, device, class_names=["Neutral","Hate"]):
     """
     Computing words importance for each sample in df
     """
@@ -38,9 +43,6 @@ def model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos,
 
     # accumalate couple samples in this array for visualization purposes
     vis_data_records_ig = []
-
-    phase = "test"
-    model.train()
     
     for i in range(max_samples):
         sentence = df.iloc[i].text
@@ -49,9 +51,32 @@ def model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos,
         with torch.set_grad_enabled(True):
             interpret_sentence(model, field, pad_ind=pad_ind, input_data=input_tokens, sentence=sentence, vocab_stoi=vocab_stoi, \
                                vocab_itos=vocab_itos, device=device, vis_data_records_ig=vis_data_records_ig,\
-                               token_reference=token_reference, lig=lig, min_len = 7, label = label, \
+                               token_reference=token_reference, lig=lig, min_len=7, label=label, \
                                class_names=class_names)
     
+    print("Computations completed.")
+    return vis_data_records_ig
+
+def model_explainability_per_index(idx, interpret_sentence, lig, model, vocab_stoi, vocab_itos, 
+                                   df, field, device, class_names=["Neutral","Hate"]):
+    """
+    Computing words importance for a single instance based on its index.
+    """
+    pad_ind = field.vocab.stoi[field.pad_token]-1 #vocab_stoi[field.pad_token]
+    token_reference = TokenReferenceBase(reference_token_idx=pad_ind)
+
+    # accumalate couple samples in this array for visualization purposes
+    vis_data_records_ig = []
+
+    sentence = df.iloc[idx].text
+    label = df.iloc[idx].true_label
+    input_tokens = sentence_to_input_tokens(sentence, vocab_stoi)
+    with torch.set_grad_enabled(True):
+        interpret_sentence(model, field, pad_ind=pad_ind, input_data=input_tokens, sentence=sentence, vocab_stoi=vocab_stoi, \
+                           vocab_itos=vocab_itos, device=device, vis_data_records_ig=vis_data_records_ig,\
+                           token_reference=token_reference, lig=lig, min_len=7, label=label, \
+                           class_names=class_names)
+
     print("Computations completed.")
     return vis_data_records_ig
 
@@ -63,6 +88,21 @@ def sentence_to_input_tokens(sentence, vocab_stoi):
     input_tokens= torch.tensor(input_tokens).unsqueeze(0).permute(1, 0)
     return input_tokens
 
+def dataset_visualization(interpret_sentence, lig, visualize_text, model, vocab_stoi, vocab_itos, df,\
+                           field, device, max_samples=10,partial_vis=False,class_names=["Neutral","Hate"]):
+    n = len(df)
+    if partial_vis:
+        n = min(n,max_samples)
+    
+    vis_data_record = model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos, df, n,\
+                                           field, device, class_names=class_names)
+    print("\n\n**LOADING VISUALIZATION**\n")
+    visualize_text(vis_data_record)
+
+"""
+BERT's XAI methods
+"""
+
 def model_explainability_bert(interpret_sentence, lig, model, df, max_samples, device):
     """
     Computing words importance for each sample in df
@@ -73,8 +113,6 @@ def model_explainability_bert(interpret_sentence, lig, model, df, max_samples, d
     # accumalate couple samples in this array for visualization purposes
     vis_data_records_ig = []
 
-    phase = "test"
-    
     for i in range(max_samples):
         sentence = df.iloc[i].text
         label = df.iloc[i].true_label
@@ -84,17 +122,34 @@ def model_explainability_bert(interpret_sentence, lig, model, df, max_samples, d
     print("Computations completed.")
     return vis_data_records_ig
 
+def model_explainability_bert_per_index(idx, interpret_sentence, lig, model, df, device):
+    """
+    Computing words importance for a single instance based on its index.
+    """
+    vis_data_records_ig = []
+
+    sentence = df.iloc[idx].text
+    label = df.iloc[idx].true_label
+    with torch.set_grad_enabled(False):
+        interpret_sentence(model, sentence, label, vis_data_records_ig, device)
+
+    print("Computations completed.")
+    return vis_data_records_ig
+
 def dataset_visualization_bert(interpret_sentence, lig, visualize_text, model, df, 
                                device, max_samples=10,partial_vis=False):
     n = len(df)
     if partial_vis:
         n = min(n,max_samples)
-    
-    vis_data_record = model_explainability_bert(interpret_sentence, lig, model, df, max_samples, device)
+
+    vis_data_record = model_explainability_bert(interpret_sentence, lig, model, df, n, device)
 
     print("\n\n**LOADING VISUALIZATION**\n")
     visualize_text(vis_data_record)
 
+"""
+Utils methods
+"""
 
 def format_classname(classname):
 
