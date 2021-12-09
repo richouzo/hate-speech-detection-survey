@@ -149,7 +149,7 @@ def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_
 
 def get_dataloaders(train_data, val_data, test_data, batch_size, device):
     train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)
-    _, test_iterator = create_iterators(train_data, test_data, batch_size, device, shuffle=False)
+    _, test_iterator = create_iterators(train_data, test_data, 1, device, shuffle=False)
     print("dataloaders created..")
 
     dataloaders = {}
