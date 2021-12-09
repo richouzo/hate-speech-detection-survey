@@ -42,7 +42,7 @@ python gridsearch.py
 
 | Hyperparameters      | Possible values |
 | ----------- | ----------- |
-| model_type  | ['BasicLSTM', 'BiLSTM', <br />'HybridCNNLSTM', 'HybridLSTMCNN', <br />'DistillBert', 'DistillBertEmotion']       |
+| model_type  | ['BasicLSTM', 'BiLSTM', <br />'HybridCNNLSTM', 'HybridLSTMCNN', <br />'DistillBert', 'DistillBertEmotion', TinyBert']       |
 | optimizer_type   | ['adam', 'adamw', 'sgd']        |
 | loss_criterion   | ['bceloss', 'bcelosswithlogits', 'crossentropy']        |
 | lr   | [*float*]        |
