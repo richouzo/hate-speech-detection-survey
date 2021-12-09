@@ -143,7 +143,7 @@ if __name__ == '__main__':
         stats_df = main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, 
                              saved_model_path, loss_criterion, device, only_test, 
                              context_size=context_size, pyramid=pyramid, fcs=fcs,
-                             batch_norm=batch_norm, alpha=alpha)
+                             batch_norm=batch_norm, alpha=alpha, fix_length=fix_length)
 
     else:
         print("Stats csv already exists, retrieving csv...")
