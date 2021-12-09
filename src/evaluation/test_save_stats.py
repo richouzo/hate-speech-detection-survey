@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from utils import STATS_CSV
+from src.utils.utils import STATS_CSV
 
 def get_highest_lowest_metric_indexes(stats_df, stats_metric='loss', stats_topk=5):
     assert stats_metric in ['prob', 'loss']
@@ -19,8 +19,8 @@ def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path,
               saved_model_path, loss_criterion, device, only_test=False,
               fix_length=None,
               context_size=1, pyramid=[256,256], fcs=[128],batch_norm=0, alpha=0.2):
-    from utils import load_model, load_trained_model, classif_report
-    from train import test_model, test_model_and_save_stats
+    from src.utils.utils import load_model, load_trained_model, classif_report
+    from src.training.train_utils import test_model, test_model_and_save_stats
     print()
     print('model_type:', model_type)
     print('loss_criterion:', loss_criterion)
