@@ -15,7 +15,10 @@ def get_highest_lowest_metric_indexes(stats_df, stats_metric='loss', stats_topk=
 
     return (lowest_stats_df, highest_stats_df)
 
-def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_model_path, loss_criterion, device, only_test=False):
+def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, 
+              saved_model_path, loss_criterion, device, only_test=False,
+              fix_length=None,
+              context_size=1, pyramid=[256,256], fcs=[128],batch_norm=0, alpha=0.2):
     from utils import load_model, load_trained_model, classif_report
     from train import test_model, test_model_and_save_stats
     print()
@@ -24,7 +27,9 @@ def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, saved_
     print()
 
     # Instanciate model 
-    model = load_model(model_type, field, device)
+    model = load_model(model_type, field, device, fix_length=fix_length,
+                       context_size=context_size, pyramid=pyramid, fcs=fcs,
+                       batch_norm=batch_norm, alpha=alpha)
     model = load_trained_model(model, saved_model_path, device)
 
     print("Model {} loaded on {}".format(model_type, device))
@@ -76,6 +81,11 @@ if __name__ == '__main__':
     parser.add_argument("--stats_topk", default=5, help="topk indexes to retrieve", type=int)
     parser.add_argument("--stats_label", default=0, help="label indexes to retrieve", type=int)
     parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
+    parser.add_argument("--context_size", default=2, type=int, help="")
+    parser.add_argument('--pyramid', default="256", help='delimited list for pyramid input', type=str)
+    parser.add_argument('--fcs', default="128,256", help='delimited list for fcs input', type=str)
+    parser.add_argument("--batch_norm", default=1, type=int, help="")
+    parser.add_argument("--alpha", default=0.8, type=int, help="")
 
     args = parser.parse_args()
 
@@ -90,7 +100,16 @@ if __name__ == '__main__':
     saved_model_path = args.saved_model_path
     loss_criterion = args.loss_criterion
     model_type = args.model
+
+    # HybridLSTMCNN
     fix_length = args.fix_length
+
+    # PyramidCNN parameters
+    context_size = args.context_size
+    pyramid = [int(item) for item in args.pyramid.split(',')]
+    fcs = [int(item) for item in args.fcs.split(',')]
+    batch_norm = args.batch_norm
+    alpha = args.alpha
 
     # Get model_id
     regex = '\d+-\d+-\d+_\d+-\d+-\d+'
@@ -122,7 +141,9 @@ if __name__ == '__main__':
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         stats_df = main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, 
-                             saved_model_path, loss_criterion, device, only_test)
+                             saved_model_path, loss_criterion, device, only_test, 
+                             context_size=context_size, pyramid=pyramid, fcs=fcs,
+                             batch_norm=batch_norm, alpha=alpha)
 
     else:
         print("Stats csv already exists, retrieving csv...")

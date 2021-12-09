@@ -20,7 +20,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 
          scheduler_type='', patience_lr=5,  
          training_remaining=1, save_condition='acc', fix_length=None,
-         context_size=1, pyramid=[128,128], fcs=[128],batch_norm=0, alpha=0.2):
+         context_size=1, pyramid=[256], fcs=[128,256], batch_norm=0, alpha=0.2):
     print()
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -153,6 +153,11 @@ if __name__ == '__main__':
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
     parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
     parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
+    parser.add_argument("--context_size", default=2, type=int, help="")
+    parser.add_argument('--pyramid', default="256", help='delimited list for pyramid input', type=str)
+    parser.add_argument('--fcs', default="128,256", help='delimited list for fcs input', type=str)
+    parser.add_argument("--batch_norm", default=1, type=int, help="")
+    parser.add_argument("--alpha", default=0.8, type=int, help="")
 
     args = parser.parse_args()
 
@@ -162,18 +167,31 @@ if __name__ == '__main__':
     test_labels_data = args.test_labels_data
 
     # Hyperparameters
-    batch_size = args.batch_size
-    epochs = args.epochs
-    patience_es = args.patience_es
-    patience_lr = args.patience_lr
-    scheduler_type = args.scheduler_type
-    lr = args.lr
+    model_type = args.model
     optimizer_type = args.optimizer_type
     loss_criterion = args.loss_criterion
-    model_type = args.model
-    do_save = args.do_save
+    lr = args.lr
+    epochs = args.epochs
+    batch_size = args.batch_size
+    patience_es = args.patience_es
+
+    # Scheduler
+    scheduler_type = args.scheduler_type
+    patience_lr = args.patience_lr
+
+    # Saving condition by acc or loss
     save_condition = args.save_condition
+    do_save = args.do_save
+
+    # HybridLSTMCNN
     fix_length = args.fix_length
+
+    # PyramidCNN parameters
+    context_size = args.context_size
+    pyramid = [int(item) for item in args.pyramid.split(',')]
+    fcs = [int(item) for item in args.fcs.split(',')]
+    batch_norm = args.batch_norm
+    alpha = args.alpha
 
     if args.device in ['cuda', 'cpu']:
         device = args.device
@@ -188,4 +206,6 @@ if __name__ == '__main__':
 
     main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr, 
          batch_size, epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, 
-         scheduler_type=scheduler_type, patience_lr=patience_lr, fix_length=fix_length)
+         scheduler_type=scheduler_type, patience_lr=patience_lr, fix_length=fix_length, 
+         context_size=context_size, pyramid=pyramid, fcs=fcs,
+         batch_norm=batch_norm, alpha=alpha)
