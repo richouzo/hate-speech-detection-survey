@@ -1,4 +1,4 @@
-# 🤬 A survey on Hate Speech Detection using NLP algorithms 
+# 🤬 A Comparative Study on NLP algorithms for Hate Speech Detection
 
 **Context**: Final Project for CS7643/CS7650 courses at Georgia Tech, Fall 2021
 
