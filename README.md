@@ -17,4 +17,14 @@ All of our best trained models can be found [here](https://1drv.ms/u/s!Ak4YJhU8z
 
 ## Word importance with Captum
 
-Please refer to [interpret.md](docs/interpret.md).
+This is the qualitative part of our survey. We use [Captum](https://captum.ai/) to interpret our trained models. Here are some examples from our best DistillBert trained model on the test set:
+
+#### True Positive
+
+![DistillBert_TP](docs/assets/DistillBert_TP.png)
+
+#### False Positive
+
+![DistillBert_FP](docs/assets/DistillBert_FP.png)
+
+Please refer to [interpret.md](docs/interpret.md) for more details.
