@@ -63,6 +63,7 @@ def main_test(dataloaders, phase, field, tokenizer, model_type, csv_path,
                                                phase=phase, field=field, tokenizer=tokenizer, stats_dict=stats_dict)
         stats_df = pd.DataFrame(data=stats_dict).reset_index(drop=True)
         stats_df.to_csv(csv_path)
+        print("Stats saved at {}".format(csv_path))
 
     return stats_df
 
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     parser.add_argument("--saved_model_path", help="path to trained model", default='saved_models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--device", default='', help="cpu or cuda for gpu")
-    parser.add_argument("--only_test", default=0, help="debug test")
+    parser.add_argument("--only_test", default=0, help="debug test", type=int)
     parser.add_argument("--stats_metric", default='loss', help="metric to retrieve stats")
     parser.add_argument("--stats_topk", default=5, help="topk indexes to retrieve", type=int)
     parser.add_argument("--stats_label", default=0, help="label indexes to retrieve", type=int)
@@ -140,7 +141,7 @@ if __name__ == '__main__':
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         stats_df = main_test(dataloaders, phase, field, tokenizer, model_type, csv_path, 
-                             saved_model_path, loss_criterion, device, only_test, 
+                             saved_model_path, loss_criterion, device, only_test=only_test, 
                              context_size=context_size, pyramid=pyramid, fcs=fcs,
                              batch_norm=batch_norm, alpha=alpha, fix_length=fix_length)
 
