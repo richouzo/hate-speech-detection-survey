@@ -44,39 +44,18 @@ def model_explainability(interpret_sentence, lig, model, vocab_stoi, vocab_itos,
     # accumalate couple samples in this array for visualization purposes
     vis_data_records_ig = []
     
-    for i in range(max_samples):
-        sentence = df.iloc[i].text
-        label = df.iloc[i].true_label
+    for idx in range(max_samples):
+        sentence = df.iloc[idx].text
+        label = df.iloc[idx].true_label
+        original_idx = df.iloc[idx].original_index
         input_tokens = sentence_to_input_tokens(sentence, vocab_stoi)
         with torch.set_grad_enabled(True):
             interpret_sentence(model, field, pad_ind=pad_ind, input_data=input_tokens, sentence=sentence, vocab_stoi=vocab_stoi, \
-                               vocab_itos=vocab_itos, device=device, vis_data_records_ig=vis_data_records_ig,\
+                               vocab_itos=vocab_itos, device=device, original_idx=original_idx, 
+                               vis_data_records_ig=vis_data_records_ig,\
                                token_reference=token_reference, lig=lig, min_len=7, label=label, \
                                class_names=class_names)
     
-    print("Computations completed.")
-    return vis_data_records_ig
-
-def model_explainability_per_index(idx, interpret_sentence, lig, model, vocab_stoi, vocab_itos, 
-                                   df, field, device, class_names=["Neutral","Hate"]):
-    """
-    Computing words importance for a single instance based on its index.
-    """
-    pad_ind = field.vocab.stoi[field.pad_token]-1 #vocab_stoi[field.pad_token]
-    token_reference = TokenReferenceBase(reference_token_idx=pad_ind)
-
-    # accumalate couple samples in this array for visualization purposes
-    vis_data_records_ig = []
-
-    sentence = df.iloc[idx].text
-    label = df.iloc[idx].true_label
-    input_tokens = sentence_to_input_tokens(sentence, vocab_stoi)
-    with torch.set_grad_enabled(True):
-        interpret_sentence(model, field, pad_ind=pad_ind, input_data=input_tokens, sentence=sentence, vocab_stoi=vocab_stoi, \
-                           vocab_itos=vocab_itos, device=device, vis_data_records_ig=vis_data_records_ig,\
-                           token_reference=token_reference, lig=lig, min_len=7, label=label, \
-                           class_names=class_names)
-
     print("Computations completed.")
     return vis_data_records_ig
 
@@ -113,25 +92,12 @@ def model_explainability_bert(interpret_sentence, lig, model, df, max_samples, d
     # accumalate couple samples in this array for visualization purposes
     vis_data_records_ig = []
 
-    for i in range(max_samples):
-        sentence = df.iloc[i].text
-        label = df.iloc[i].true_label
+    for idx in range(max_samples):
+        sentence = df.iloc[idx].text
+        label = df.iloc[idx].true_label
+        original_idx = df.iloc[idx].original_index
         with torch.set_grad_enabled(False):
-            interpret_sentence(model, sentence, label, vis_data_records_ig, device)
-
-    print("Computations completed.")
-    return vis_data_records_ig
-
-def model_explainability_bert_per_index(idx, interpret_sentence, lig, model, df, device):
-    """
-    Computing words importance for a single instance based on its index.
-    """
-    vis_data_records_ig = []
-
-    sentence = df.iloc[idx].text
-    label = df.iloc[idx].true_label
-    with torch.set_grad_enabled(False):
-        interpret_sentence(model, sentence, label, vis_data_records_ig, device)
+            interpret_sentence(model, sentence, label, original_idx, vis_data_records_ig, device)
 
     print("Computations completed.")
     return vis_data_records_ig
@@ -148,7 +114,7 @@ def dataset_visualization_bert(interpret_sentence, lig, visualize_text, model, d
     visualize_text(vis_data_record)
 
 """
-Utils methods
+Visualization methods
 """
 
 def format_classname(classname):
@@ -199,6 +165,32 @@ def _get_color(attr):
 #     lig = np.clip(100 - int(50 * attr), 0, 100)
     return "hsl({}, {}%, {}%)".format(hue, sat, lig)
 
+class VisualizationDataRecordCustom:
+    """
+    A data record for storing attribution relevant information
+    """
+    def __init__(
+        self,
+        word_attributions,
+        pred_prob,
+        pred_class,
+        true_class,
+        attr_class,
+        attr_score,
+        raw_input_ids,
+        convergence_score,
+        original_idx,
+    ) -> None:
+        self.word_attributions = word_attributions
+        self.pred_prob = pred_prob
+        self.pred_class = pred_class
+        self.true_class = true_class
+        self.attr_class = attr_class
+        self.attr_score = attr_score
+        self.raw_input_ids = raw_input_ids
+        self.convergence_score = convergence_score
+        self.original_idx = original_idx
+
 def visualize_text(
     datarecords, legend: bool = True
 ) -> "HTML":  # In quotes because this type doesn't exist in standalone mode
@@ -209,7 +201,8 @@ def visualize_text(
     )
     dom = ["<table width: 100%>"]
     rows = [
-        "<tr><th>True Label</th>"
+        "<tr><th>Original Index</th>"
+        "<th>True Label</th>"
         "<th>Predicted Label</th>"
         "<th>Attribution Label</th>"
         "<th>Attribution Score</th>"
@@ -221,6 +214,7 @@ def visualize_text(
             "".join(
                 [
                     "<tr>",
+                    format_classname(datarecord.original_idx),
                     format_classname(datarecord.true_class),
                     format_classname(
                         "{0} ({1:.2f})".format(
@@ -230,7 +224,7 @@ def visualize_text(
                     format_classname(datarecord.attr_class),
                     format_classname("{0:.2f}".format(datarecord.attr_score)),
                     format_word_importances(
-                        datarecord.raw_input, datarecord.word_attributions
+                        datarecord.raw_input_ids, datarecord.word_attributions
                     ),
                     "<tr>",
                 ]
@@ -260,5 +254,4 @@ def visualize_text(
     display(html)
 
     return html
-
 
