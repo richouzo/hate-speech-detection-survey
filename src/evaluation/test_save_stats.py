@@ -129,7 +129,7 @@ if __name__ == '__main__':
     if not os.path.exists(csv_path) or only_test:
         print("Starting the test pipeline...")
         import torch
-        from preprocess_utils import get_datasets, get_dataloaders
+        from src.utils.preprocess_utils import get_datasets, get_dataloaders
 
         if args.device in ['cuda', 'cpu']:
             device = args.device
