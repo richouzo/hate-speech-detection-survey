@@ -41,7 +41,15 @@ class PyramidCNN(nn.Module):
 
 
     def forward(self, x):
+        
+        min_len=60
+        
+        if x.shape[0]<min_len:
+            pad_len = min_len - x.shape[0]
+            pad = torch.ones((pad_len,x.shape[1]), dtype=torch.int32, device=x.device)
+            x = torch.cat([x,pad],axis=0)
         emb = self.emb[0](x)
+ 
         for i in range(self.context_size):
           x_prev = torch.roll(x,1,dims=1)
           x_prev[:,0] = 1
