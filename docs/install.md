@@ -4,10 +4,9 @@
 
 ## Installation
 
-Tested with Python 3.8.12
+Tested with Python 3.8.12 and PyTorch 1.10.0
 
-Install PyTorch first.  
-Please refer to [PyTorch installation page](https://pytorch.org/get-started/locally/#start-locally) regarding the specific install command for your platform.
+Please install PyTorch first, and refer to the [PyTorch installation page](https://pytorch.org/get-started/locally/#start-locally) regarding the specific install command for your platform.
 
 After PyTorch has finished installing, you can install from source by cloning the repository and run the following commands:
 
