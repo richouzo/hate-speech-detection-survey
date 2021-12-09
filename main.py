@@ -20,8 +20,8 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 
          scheduler_type='', patience_lr=5,  
          training_remaining=1, save_condition='acc', fix_length=None,
-         context_size=1, pyramid=[256], fcs=[128,256], batch_norm=0, alpha=0.2):
-    print()
+         context_size=2, pyramid=[64,128,256], fcs=[64,128], batch_norm=1, alpha=0.2):
+
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
     print('loss_criterion:', loss_criterion)

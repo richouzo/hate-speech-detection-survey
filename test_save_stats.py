@@ -83,11 +83,10 @@ if __name__ == '__main__':
     parser.add_argument("--stats_label", default=0, help="label indexes to retrieve", type=int)
     parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
     parser.add_argument("--context_size", default=2, type=int, help="")
-    parser.add_argument('--pyramid', default="256", help='delimited list for pyramid input', type=str)
-    parser.add_argument('--fcs', default="128,256", help='delimited list for fcs input', type=str)
+    parser.add_argument('--pyramid', default="64,128,256", help='delimited list for pyramid input', type=str)
+    parser.add_argument('--fcs', default="128,256,256", help='delimited list for fcs input', type=str)
     parser.add_argument("--batch_norm", default=1, type=int, help="")
     parser.add_argument("--alpha", default=0.8, type=int, help="")
-
     args = parser.parse_args()
 
     # Data processing
