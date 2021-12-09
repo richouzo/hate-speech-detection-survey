@@ -11,10 +11,10 @@ import torch
 from torch import optim
 import torch.nn as nn
 
-from preprocess_utils import get_datasets, get_dataloaders
-from train import train_model, test_model
+from src.utils.preprocess_utils import get_datasets, get_dataloaders
+from src.training.train_utils import train_model, test_model
 
-from utils import load_model, save_model, plot_training, plot_cm, classif_report
+from src.utils.utils import load_model, save_model, plot_training, plot_cm, classif_report
 
 def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 

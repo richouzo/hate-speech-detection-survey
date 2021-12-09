@@ -10,9 +10,9 @@ import torch
 import itertools
 import yaml
 
-from preprocess_utils import get_datasets, get_dataloaders
-from utils import GRIDSEARCH_CSV
-from main import main
+from src.utils.preprocess_utils import get_datasets, get_dataloaders
+from src.utils.utils import GRIDSEARCH_CSV
+from src.training.main import main
 
 def get_gridsearch_config(config_path):
     with open(config_path, "r") as ymlfile:
