@@ -1,5 +1,7 @@
 # Training instructions
 
+[Main README](../README.md)
+
 All commands should be used from root directory.
 
 ## Training
