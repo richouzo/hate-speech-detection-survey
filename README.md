@@ -2,7 +2,7 @@
 
 **Context**: Final Project for CS7643/CS7650 courses at Georgia Tech, Fall 2021
 
-**Authors**: Aymane Abdali (CS7643/CS7650), Maya Boumerdassi (CS7643), Mohammed Amine Dassouli (CS7643/CS7650), Jonathan Hou (CS7643), Richard Huang (CS7643/CS7650)
+**Authors**: Aymane Abdali (CS7643/CS7650), Maya Boumerdassi (CS7643), Mohamed Amine Dassouli (CS7643/CS7650), Jonathan Hou (CS7643), Richard Huang (CS7643/CS7650)
 
 ## Installation phase
 
