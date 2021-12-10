@@ -1,8 +1,15 @@
 # 🤬 A Comparative Study on NLP algorithms for Hate Speech Detection
 
-**Context**: Final Project for CS7643/CS7650 courses at Georgia Tech, Fall 2021
+**Context**: Final Project for [CS7643](https://www.cc.gatech.edu/classes/AY2022/cs7643_fall/)/[CS7650](https://cocoxu.github.io/CS7650_fall2021/) courses at Georgia Tech, Fall 2021
 
-**Authors**: Aymane Abdali (CS7643/CS7650), Maya Boumerdassi (CS7643), Mohamed Amine Dassouli (CS7643/CS7650), Jonathan Hou (CS7643), Richard Huang (CS7643/CS7650)
+**Abstract**: Hate Speech remains one of the most pressing issues that come with the rise of social media. While social media has been a blessing in allowing users to connect with same minded people, it can be a breeding ground for hateful ideas and extremism, and when allowed to fester, can lead to physical violence, as shown in many recent events. In our study, we aim to compare different novel algorithms, not traditionally used for hate speech detection but rather used for other natural language tasks, to see if any of them are more effective are recognizing hate speech. By comparing the LSTM, BiLSTM, HybridLSTMCNN, HybridCNNLSTM, PyramidCNN, TinyBert and DistillBert algorithms and comparing their accuracy scores and model sizes, we will see if any of these novel algorithms offer some benefits to the traditional model of hate speech recognition.
+
+**Authors**: 
+- Aymane Abdali (CS7643/CS7650)
+- Maya Boumerdassi (CS7643)
+- Mohamed Amine Dassouli (CS7643/CS7650)
+- Jonathan Hou (CS7643)
+- Richard Huang (CS7643/CS7650)
 
 ## Installation phase
 
