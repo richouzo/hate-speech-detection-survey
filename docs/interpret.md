@@ -27,4 +27,4 @@ In the current state, we use Integrated Gradients from [Captum](https://captum.a
 
 Here is the Confusion Matrix of our best trained model `DistillBert_2021-12-08_16-39-08_trained_testAcc=0.7960.pth` used in the XAI Bert notebook:
 
-![DistillBert_CM](../assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png)
+![DistillBert_CM](./assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png)
