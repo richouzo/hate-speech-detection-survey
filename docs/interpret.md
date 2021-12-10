@@ -23,8 +23,24 @@ In the current state, we use Integrated Gradients from [Captum](https://captum.a
 
 - For BERT-based models, please use this [XAI Bert notebook](../src/evaluation/explainability_visualization_bert.ipynb) (Example on our best DistillBert trained model).
 
-## Details
+## Details on XAI Bert notebook
 
 Here is the Confusion Matrix of our best trained model `DistillBert_2021-12-08_16-39-08_trained_testAcc=0.7960.pth` used in the XAI Bert notebook:
 
 ![DistillBert_CM](../assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png)
+
+#### True Positive
+
+![DistillBert_TP](docs/assets/DistillBert_TP.png)
+
+#### False Positive
+
+![DistillBert_FP](docs/assets/DistillBert_FP.png)
+
+#### True Negative
+
+![DistillBert_TN](docs/assets/DistillBert_TN.png)
+
+#### False Negative
+
+![DistillBert_FN](docs/assets/DistillBert_FN.png)
