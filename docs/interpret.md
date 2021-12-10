@@ -19,6 +19,12 @@ We provide two notebooks to visualize which parts of the input sentence are used
 
 In the current state, we use Integrated Gradients from [Captum](https://captum.ai/) library to obtain the attribution scores for each word in a given sentence. 
 
-- For CNN/RNN-based models, please use this [notebook](../src/evaluation/explainability_visualization.ipynb) (Example on our best BasicLSTM trained model).
+- For CNN/RNN-based models, please use this [XAI LSTM notebook](../src/evaluation/explainability_visualization.ipynb) (Example on our best BasicLSTM trained model).
 
-- For BERT-based models, please use this [notebook](../src/evaluation/explainability_visualization_bert.ipynb) (Example on our best DistillBert trained model).
+- For BERT-based models, please use this [XAI Bert notebook](../src/evaluation/explainability_visualization_bert.ipynb) (Example on our best DistillBert trained model).
+
+## Details
+
+Here is the Confusion Matrix of our best trained model `DistillBert_2021-12-08_16-39-08_trained_testAcc=0.7960.pth` used in the XAI Bert notebook:
+
+![DistillBert_CM](../assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png)
