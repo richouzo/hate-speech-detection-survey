@@ -27,20 +27,20 @@ In the current state, we use Integrated Gradients from [Captum](https://captum.a
 
 Here is the Confusion Matrix of our best trained model `DistillBert_2021-12-08_16-39-08_trained_testAcc=0.7960.pth` used in the XAI Bert notebook:
 
-<img src="./assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png"  width="750" height="525">
+<img src="./assets/DistillBert_CM_2021-12-08_16-39-08_testAcc=0.7960.png"  width="500" height="350">
 
 #### True Positive
 
-![DistillBert_TP](docs/assets/DistillBert_TP.png)
+![DistillBert_TP](./assets/DistillBert_TP.png)
 
 #### False Positive
 
-![DistillBert_FP](docs/assets/DistillBert_FP.png)
+![DistillBert_FP](./assets/DistillBert_FP.png)
 
 #### True Negative
 
-![DistillBert_TN](docs/assets/DistillBert_TN.png)
+![DistillBert_TN](./assets/DistillBert_TN.png)
 
 #### False Negative
 
-![DistillBert_FN](docs/assets/DistillBert_FN.png)
+![DistillBert_FN](./assets/DistillBert_FN.png)
