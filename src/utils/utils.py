@@ -15,10 +15,10 @@ from sklearn.metrics import confusion_matrix
  
 from src.models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer, PyramidCNN
 
-SAVED_MODELS_PATH = "saved_models/"
+SAVED_MODELS_PATH = "saved-models/"
 FIGURES_PATH = "figures/"
-GRIDSEARCH_CSV = "gridsearch_results/"
-STATS_CSV = "stats_results/"
+GRIDSEARCH_CSV = "gridsearch-results/"
+STATS_CSV = "stats-results/"
 
 def load_model(model_type, field, device, 
                context_size=0, pyramid=[256, 256], 

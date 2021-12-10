@@ -16,7 +16,7 @@ python -m src.training.main
 
 ## Gridsearch training
 
-Gridsearch csv files are saved in `gridsearch_results/` folder.
+Gridsearch csv files are saved in `gridsearch-results/` folder.
 
 You can modify the gridsearch parameters in [gridsearch_config.yml](../gridsearch_config.yml) before running this command:
 
@@ -46,5 +46,5 @@ To print the model size parameters, loss and accuracy on the test set, run this 
 
 ```bash
 ### Example on our best BasicLSTM trained model
-python -m src.evaluation.test_save_stats --model BasicLSTM --saved_model_path saved_models/BasicLSTM_2021-12-08_01-04-25_trained_testAcc=0.7107.pth --loss_criterion bcelosswithlogits --only_test 1
+python -m src.evaluation.test_save_stats --model BasicLSTM --saved_model_path saved-models/BasicLSTM_2021-12-08_01-04-25_trained_testAcc=0.7107.pth --loss_criterion bcelosswithlogits --only_test 1
 ```

@@ -155,7 +155,7 @@ if __name__ == '__main__':
     parser.add_argument("--save_condition", help="save model with"+\
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
     parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
-    parser.add_argument("--model_path", default='saved_models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth' , help="saved model to load")
+    parser.add_argument("--model_path", default='saved-models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth' , help="saved model to load")
 
 
     args = parser.parse_args()

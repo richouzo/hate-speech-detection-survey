@@ -74,7 +74,7 @@ if __name__ == '__main__':
     parser.add_argument("--testset_data", help="unprocessed OLID testset dataset", default="data/test_data/testset-levela.tsv")
     parser.add_argument("--test_labels_data", help="unprocessed OLID test labels dataset", default="data/test_data/labels-levela.csv")
     parser.add_argument("--model", help="model to use. Choices are: BasicLSTM, ...", default='BiLSTM')
-    parser.add_argument("--saved_model_path", help="path to trained model", default='saved_models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth')
+    parser.add_argument("--saved_model_path", help="path to trained model", default='saved-models/BiLSTM_2021-12-03_23-58-08_trained_testAcc=0.5561.pth')
     parser.add_argument("--loss_criterion", help="loss function: bceloss, crossentropy", default='bcelosswithlogits')
     parser.add_argument("--device", default='', help="cpu or cuda for gpu")
     parser.add_argument("--only_test", default=0, help="debug test", type=int)

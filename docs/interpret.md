@@ -6,11 +6,11 @@ All commands should be used from root directory.
 
 ## Retrieve stats for visualisation
 
-Stats csv files are saved in stats_results/ folder, run this command before running the notebooks:
+Stats csv files are saved in `stats-results/` folder, run this command before running the notebooks:
 
 ```bash
 ### Example on our best BasicLSTM trained model
-python -m src.evaluation.test_save_stats --model BasicLSTM --saved_model_path saved_models/BasicLSTM_2021-12-08_01-04-25_trained_testAcc=0.7107.pth --loss_criterion bcelosswithlogits --only_test 0 --stats_label 1
+python -m src.evaluation.test_save_stats --model BasicLSTM --saved_model_path saved-models/BasicLSTM_2021-12-08_01-04-25_trained_testAcc=0.7107.pth --loss_criterion bcelosswithlogits --only_test 0 --stats_label 1
 ```
 
 ## Word importance visualisations with Captum:
