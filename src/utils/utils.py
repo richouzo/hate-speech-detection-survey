@@ -13,17 +13,18 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
  
-from src.models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer, PyramidCNN
+from models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer, PyramidCNN
 
-SAVED_MODELS_PATH = "saved-models/"
+SAVED_MODELS_PATH = "saved_models/"
 FIGURES_PATH = "figures/"
-GRIDSEARCH_CSV = "gridsearch-results/"
-STATS_CSV = "stats-results/"
+GRIDSEARCH_CSV = "gridsearch_results/"
+STATS_CSV = "stats_results/"
 
 def load_model(model_type, field, device, 
                context_size=0, pyramid=[256, 256], 
-               fcs=[128], batch_norm=0, alpha=0.2, 
-               fix_length=None):
+               fcs=[128], batch_norm=0, alpha=0.2,
+               pad_len=30, pooling_size=2,
+               fix_length=None, glove=None):
     """
     Load and return model.
     """
@@ -37,7 +38,7 @@ def load_model(model_type, field, device,
     elif model_type == 'Transformers':
         model = Transformers.Transformers(dim_emb=128, num_words=field.vocab.__len__(), 
                                           hidden_dim=128, num_layers=2, output_dim=1)
-    elif model_type == 'TinyBert':
+    elif model_type == 'AutoTransformer':
         model = AutoTransformer.AutoTransformer(dim_emb=128, num_words=field.vocab.__len__(), 
                                           hidden_dim=128, num_layers=2, output_dim=1, hidden_dropout_prob = 0.5)
     elif model_type == 'DistillBert':
@@ -48,7 +49,8 @@ def load_model(model_type, field, device,
 
     elif model_type == 'PyramidCNN':
         model = PyramidCNN.PyramidCNN(num_words=field.vocab.__len__(),context_size=context_size, 
-                                      pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha)
+                                      pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha, 
+                                      pad_len=pad_len, pooling_size=pooling_size, glove=glove)
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
@@ -146,3 +148,58 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
         plt.savefig(cm_path)
         if do_print: print(f"Confusion Matrix saved at {cm_path}")
     if do_plot: plt.show()
+
+# From https://github.com/Bjarten/early-stopping-pytorch
+class EarlyStopping:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+    def __init__(self, patience=7, verbose=False, delta=0, save_condition='loss', path=SAVED_MODELS_PATH+'checkpoint.pt'):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 7
+            verbose (bool): If True, prints a message for each validation loss improvement. 
+                            Default: False
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+            path (str): Path for the checkpoint to be saved to.
+                            Default: 'checkpoint.pt'
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.score_min = np.Inf
+        self.delta = delta
+        self.path = path
+        self.save_condition = save_condition
+        assert self.save_condition in ['acc', 'loss']
+
+    def __call__(self, val_loss, val_acc, model):
+        if self.save_condition == 'loss':
+            score = -val_loss
+        elif self.save_condition == 'acc':
+            score = val_acc
+
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(val_loss, val_acc, model)
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(val_loss, val_acc, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, val_acc, model):
+        '''Saves model when validation loss decrease.'''
+        if self.verbose:
+            if self.save_condition == 'loss':
+                print(f'Validation loss decreased ({self.score_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+            elif self.save_condition == 'acc':
+                print(f'Validation acc increased ({self.score_min:.6f} --> {val_acc:.6f}).  Saving model ...')
+        torch.save(model.state_dict(), self.path)
+        self.score_min = val_loss
