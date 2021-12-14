@@ -25,12 +25,6 @@ For this study, we use the sub-task A of the OLID Dataset. This dataset contains
 
 Preprocessing functions can be found in [preprocess_utils.py](src/utils/preprocess_utils.py).
 
-## Glove: Pretrained embedding 
-
-[Glove Link](https://nlp.stanford.edu/data/glove.6B.zip) |
-
-If you want to use Glove embeddings for the PyramidCNN, please download the file from the link and place the glove.6B.300d text file in data/glove.
-
 ## Training phase
 
 Please refer to [training.md](docs/training.md).
