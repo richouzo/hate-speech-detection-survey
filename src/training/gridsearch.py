@@ -10,9 +10,9 @@ import torch
 import itertools
 import yaml
 
-from preprocess_utils import get_datasets, get_dataloaders
-from utils import GRIDSEARCH_CSV
-from main import main
+from src.utils.preprocess_utils import get_datasets, get_dataloaders
+from src.utils.utils import GRIDSEARCH_CSV
+from src.training.main import main
 
 def get_gridsearch_config(config_path):
     with open(config_path, "r") as ymlfile:
@@ -36,7 +36,18 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
     # Save gridsearch training to csv
     current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     csv_path = GRIDSEARCH_CSV+'results_{}.csv'.format(current_time)
-    results_dict = {'context_size': [], 
+    results_dict = {'model_type': [], 
+                    'optimizer_type': [], 
+                    'loss_criterion': [], 
+                    'lr': [], 
+                    'epochs': [], 
+                    'batch_size': [], 
+                    'patience_es': [], 
+                    'scheduler_type': [],
+                    'patience_lr': [], 
+                    'save_condition': [],
+                    'fix_length': [],
+                    'context_size': [], 
                     'pyramid': [], 
                     'fc': [], 
                     'batch_norm': [], 
@@ -44,9 +55,10 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'alpha': [],
                     'pooling_size': [],
                     'best_epoch': [], 
-                    'lr': [], 
+                    'train_loss': [], 
                     'val_acc': [], 
-                    'test_acc': []}
+                    'test_acc': [], 
+                    'end_time': []}
 
     # Start gridsearch
     prev_model_type = None
@@ -62,7 +74,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         pretrained_glove = False
         glove = None
         if model_type == "PyramidCNN":
-            pretrained_glove = True
+            pretrained_glove = False
 
         if prev_model_type != model_type:
             print("prev_model_type", prev_model_type)
@@ -70,7 +82,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
             print("Changing tokenizer...")
             glove, ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, 
                                                                                testset_data, test_labels_data, 
-                                                                               model_type, fix_length, pretrained_glove)
+                                                                               model_type, fix_length,'', pretrained_glove)
             prev_model_type = model_type
 
         print('fix_length:', fix_length)
@@ -93,16 +105,21 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         for key in results_dict.keys():
             if key in ['train_loss', 'val_loss', 'train_acc', 'val_acc']:
                 results_dict[key].append(history_training[key][best_epoch])
+            elif key == 'epochs':
+                results_dict[key].append(epochs)
+            elif key == 'batch_size':
+                results_dict[key].append(batch_size)
+            else:
+                if key in history_training:
+                    results_dict[key].append(history_training[key])
+
         results_dict['pyramid'].append(pyramid)
         results_dict['fc'].append(fcs)
         results_dict['batch_norm'].append(batch_norm)
-        results_dict['best_epoch'].append(history_training['best_epoch'])
         results_dict['pad_length'].append(pad_length)
         results_dict['alpha'].append(alpha)
         results_dict['context_size'].append(context_size)
-        results_dict['lr'].append(lr)
         results_dict['pooling_size'].append(pooling_size)
-        results_dict['test_acc'].append(history_training['test_acc'])
         results_csv = pd.DataFrame(data=results_dict)
         results_csv.to_csv(csv_path)
 

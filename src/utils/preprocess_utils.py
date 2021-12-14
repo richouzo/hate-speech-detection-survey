@@ -19,11 +19,10 @@ from sklearn.model_selection import train_test_split
 import transformers
 
 
-def format_training_file(text_file):
+def format_training_file(text_file, module_path=''):
     tweets = []
     classes = []
-
-    for line in open(text_file,'r',encoding='utf-8'):
+    for line in open(module_path+text_file,'r',encoding='utf-8'):
         line = re.sub(r'#([^ ]*)', r'\1', line)
         line = re.sub(r'https.*[^ ]', 'URL', line)
         line = re.sub(r'http.*[^ ]', 'URL', line)
@@ -36,19 +35,19 @@ def format_training_file(text_file):
 
     return tweets[1:], classes[1:]
 
-def train_val_split_tocsv(tweets, classes, val_size=0.1):
-    tweets_train, tweets_val, y_train, y_val = train_test_split(tweets, classes, test_size=val_size, random_state=42, stratify=classes)
+def train_val_split_tocsv(tweets, classes, val_size=0.1, module_path=''):
+    tweets_train, tweets_val, y_train, y_val = train_test_split(tweets, classes, test_size=val_size, random_state=42)
 
     df_train = pd.DataFrame({'text': tweets_train, 'label': y_train})
     df_val = pd.DataFrame({'text': tweets_val, 'label': y_val})
 
-    df_train.to_csv('data/offenseval_train.csv', index=False)
-    df_val.to_csv('data/offenseval_val.csv', index=False)
+    df_train.to_csv(module_path+'data/offenseval_train.csv', index=False)
+    df_val.to_csv(module_path+'data/offenseval_val.csv', index=False)
 
-def format_test_file(text_file_testset, text_file_labels):
+def format_test_file(text_file_testset, text_file_labels, module_path=''):
     tweets_test = []
     y_test = []
-    for line in open(text_file_testset,'r',encoding='utf-8'):
+    for line in open(module_path+text_file_testset,'r',encoding='utf-8'):
         line = re.sub(r'#([^ ]*)', r'\1', line)
         line = re.sub(r'https.*[^ ]', 'URL', line)
         line = re.sub(r'http.*[^ ]', 'URL', line)
@@ -57,17 +56,17 @@ def format_test_file(text_file_testset, text_file_labels):
         line = re.sub(' +', ' ', line)
         line = line.rstrip('\n').split('\t')
         tweets_test.append(line[1])
-    for line in open(text_file_labels,'r',encoding='utf-8'):
+    for line in open(module_path+text_file_labels,'r',encoding='utf-8'):
         line = line.rstrip('\n').split('\t')
         y_test.append(int(line[0][-3:]=='OFF'))
 
     return tweets_test[1:], y_test
 
-def test_tocsv(tweets_test, y_test):
+def test_tocsv(tweets_test, y_test, module_path=''):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
     df_test.to_csv('data/offenseval_test.csv', index=False)
 
-def create_fields_dataset(model_type, fix_length=None):
+def create_fields_dataset(model_type, fix_length=None, module_path=''):
     tokenizer = None
     if model_type == "DistillBert":
         tokenizer = transformers.DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
@@ -92,16 +91,16 @@ def create_fields_dataset(model_type, fix_length=None):
     print("field objects created")
     train_data, val_data = TabularDataset.splits(
         path = '',
-        train='data/offenseval_train.csv',
-        test='data/offenseval_val.csv',
+        train=module_path+'data/offenseval_train.csv',
+        test=module_path+'data/offenseval_val.csv',
         format='csv',
         fields=fields,
         skip_header=True,
     )
     _, test_data = TabularDataset.splits(
         path = '',
-        train='data/offenseval_train.csv',
-        test='data/offenseval_test.csv',
+        train=module_path+'data/offenseval_train.csv',
+        test=module_path+'data/offenseval_test.csv',
         format='csv',
         fields=fields,
         skip_header=True,
@@ -129,16 +128,17 @@ def get_vocab_stoi_itos(field, tokenizer=None):
         vocab_itos = field.vocab.itos
     return (vocab_stoi, vocab_itos)
 
-def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length=None, pretraied_glove=False):
+def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length=None, module_path='', pretraied_glove=False):
     # preprocessing of the train/validation tweets, then test tweets
-    tweets, classes = format_training_file(training_data)
-    tweets_test, y_test = format_test_file(testset_data, test_labels_data)
+    tweets, classes = format_training_file(training_data, module_path=module_path)
+    tweets_test, y_test = format_test_file(testset_data, test_labels_data, module_path=module_path)
     print("file loaded and formatted..")
-    train_val_split_tocsv(tweets, classes, val_size=0.2)
-    test_tocsv(tweets_test, y_test)
+    train_val_split_tocsv(tweets, classes, val_size=0.2, module_path=module_path)
+    test_tocsv(tweets_test, y_test, module_path=module_path)
     print("data split into train/val/test")
 
-    field, tokenizer, label, train_data, val_data, test_data = create_fields_dataset(model_type, fix_length)
+    field, tokenizer, label, train_data, val_data, test_data = create_fields_dataset(model_type, fix_length, 
+                                                                                     module_path=module_path)
 
     # build vocabularies using training set
     print("fields and dataset object created")

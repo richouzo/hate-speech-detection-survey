@@ -11,10 +11,10 @@ import torch
 from torch import optim
 import torch.nn as nn
 
-from preprocess_utils import get_datasets, get_dataloaders
-from train import train_model, test_model
+from src.utils.preprocess_utils import get_datasets, get_dataloaders
+from src.training.train_utils import train_model, test_model
 
-from utils import load_model, save_model, plot_training, plot_cm, classif_report
+from src.utils.utils import load_model, save_model, plot_training, plot_cm, classif_report
 
 def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 
@@ -153,14 +153,14 @@ if __name__ == '__main__':
                         " condition on best val_acc (acc) or lowest val_loss(loss)", default='acc')
     parser.add_argument("--device", default='' , help="cpu or cuda for gpu")
     parser.add_argument("--fix_length", default=None, type=int, help="fix length of max number of words per sentence, take max if None")
-    parser.add_argument("--context_size", default=2, type=int, help="")
-    parser.add_argument('--pyramid', default="256", help='delimited list for pyramid input', type=str)
-    parser.add_argument('--fcs', default="128,256", help='delimited list for fcs input', type=str)
-    parser.add_argument("--batch_norm", default=1, type=int, help="")
-    parser.add_argument("--alpha", default=0.8, type=float, help="")
-    parser.add_argument("--pad_len", default=30, type=int, help="")
-    parser.add_argument("--pooling_size", default="", type=int, help="")
-    parser.add_argument("--glove", default=False, type=bool, help="")
+    parser.add_argument("--context_size", default=2, type=int, help="PyramidCNN context size for region embedding")
+    parser.add_argument('--pyramid', default="256", help='PyramidCNN delimited list for pyramid input', type=str)
+    parser.add_argument('--fcs', default="128,256", help='PyramidCNN delimited list for fcs input', type=str)
+    parser.add_argument("--batch_norm", default=0, type=int, help="use batch normalization with pyramidCNN")
+    parser.add_argument("--alpha", default=0.5, type=float, help="PyramidCNN penalizing factor for region embedding")
+    parser.add_argument("--pad_len", default=60, type=int, help="PyramidCNN minimum batch sequence length")
+    parser.add_argument("--pooling_size", default=3, type=int, help="PyramidCNN blocks pooling filter")
+    parser.add_argument("--glove", default=False, type=bool, help="Whether to use glove pretrained vectors or no")
 
     args = parser.parse_args()
 
