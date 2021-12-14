@@ -1,11 +1,11 @@
 hyperparameters:
   # Training
   model_type: ['PyramidCNN']
-  optimizer_type: ['adamw']
-  loss_criterion: ['crossentropy']
-  lr: [0.01]
+  optimizer_type: ['adam']
+  loss_criterion: ['bcelosswithlogits']
+  lr: [0.001]
   epochs: [100]
-  batch_size: [128]
+  batch_size: [64]
   patience_es: [5]
 
   # Scheduler
@@ -19,10 +19,8 @@ hyperparameters:
   fix_length: [null]
 
   # PyramidCNN
-  context_size: [3]
-  pyramid: [[128,256,512]]
+  context_size: [0]
+  pyramid: [[256,256]]
   fcs: [[128]]
   batch_norm: [0]
-  alpha: [0.5]
-  pad_len: [60,60,60,60,60]
-  pooling_size: [2]
+  alpha: [0.2]

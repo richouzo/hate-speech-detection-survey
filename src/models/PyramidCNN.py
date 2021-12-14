@@ -5,35 +5,26 @@ from torch.nn.utils.rnn import pack_padded_sequence
 
 class PyramidCNN(nn.Module):
     
-    def __init__(self, dim_emb = 300, num_words = 10000, hidden_dim = 256, context_size = 1, alpha=0.2, 
-        fcs=[128], batch_norm=0, pyramid=[128,256,256], pad_len=32, pooling_size=2, glove=None):
+    def __init__(self, dim_emb = 300, num_words = 10000, hidden_dim = 256, context_size = 1, alpha=0.2, fcs=[128], batch_norm=0, pyramid=[128,256,256]):
         super(PyramidCNN, self).__init__()
         
         self.context_size = context_size
+        print('Context size is ',context_size)
         self.alpha = alpha 
-        self.pad_len = pad_len
         self.num_blocks = len(pyramid)
         self.batch_norm = batch_norm
 
         self.bn = nn.BatchNorm1d(dim_emb)
-
-        if glove == None:
-            self.emb = [nn.Embedding(num_words, dim_emb, padding_idx=1)]
-            for i in range(context_size):
-              self.emb.append(nn.Embedding(num_words, dim_emb, padding_idx=1))
-              self.emb.append(nn.Embedding(num_words, dim_emb, padding_idx=1))
-            self.emb = nn.ModuleList(self.emb) 
-        else:
-            self.emb = [nn.Embedding.from_pretrained(glove, freeze=False, padding_idx=1)]
-            for i in range(context_size):
-              self.emb.append(nn.Embedding.from_pretrained(glove, freeze=False, padding_idx=1))
-              self.emb.append(nn.Embedding.from_pretrained(glove, freeze=False, padding_idx=1))
-            self.emb = nn.ModuleList(self.emb) 
+        self.emb = [nn.Embedding(num_words, dim_emb, padding_idx=1)]
+        for i in range(context_size):
+          self.emb.append(nn.Embedding(num_words, dim_emb, padding_idx=1))
+          self.emb.append(nn.Embedding(num_words, dim_emb, padding_idx=1))
+        self.emb = nn.ModuleList(self.emb) 
 
         self.convs = []
         self.dos = []
         self.rel = nn.ReLU()
-        self.pool = nn.MaxPool1d(pooling_size)
+        self.pool = nn.MaxPool1d(2)
         for i in range(self.num_blocks):
             self.convs.append(nn.Conv1d(dim_emb, pyramid[i], 3, padding='same'))
             self.convs.append(nn.Conv1d(pyramid[i], dim_emb, 3, padding='same'))
@@ -45,13 +36,13 @@ class PyramidCNN(nn.Module):
         self.fc_rel = nn.LeakyReLU()
         for i in range(len(fcs)-1):
             self.fcs.append(nn.Linear(fcs[i], fcs[i+1]))
-        self.flin = nn.Linear(fcs[-1],2)
+        self.fcs.append(nn.Linear(fcs[-1],1))
         self.fcs = nn.ModuleList(self.fcs)
 
 
     def forward(self, x):
         
-        min_len=self.pad_len
+        min_len=60
         
         if x.shape[0]<min_len:
             pad_len = min_len - x.shape[0]
@@ -83,4 +74,4 @@ class PyramidCNN(nn.Module):
         for lin in self.fcs:
             fc = self.fc_rel(lin(fc))
 
-        return self.flin(fc)
+        return fc.view(-1)
