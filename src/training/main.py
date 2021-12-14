@@ -20,7 +20,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
          batch_size, epochs, patience_es, do_save, device, do_print=False, 
          scheduler_type='', patience_lr=5,  
          training_remaining=1, save_condition='acc', fix_length=None,
-         context_size=2, pyramid=[64,128,256], fcs=[128,256,256], batch_norm=1, alpha=0.2, pad_len=30, pooling_size=2, glove = None):
+         context_size=2, pyramid=[64,128,256], fcs=[64,128], batch_norm=1, alpha=0.2):
 
     print('model_type:', model_type)
     print('optimizer_type:', optimizer_type)
@@ -37,7 +37,7 @@ def main(dataloaders, field, model_type, optimizer_type, loss_criterion, lr,
     # Instantiate model 
     model = load_model(model_type, field, device, fix_length=fix_length,
             context_size=context_size, pyramid=pyramid, fcs=fcs,
-            batch_norm=batch_norm, alpha=alpha, pad_len=pad_len, pooling_size=pooling_size, glove=glove)
+            batch_norm=batch_norm, alpha=alpha)
 
 
     print("Model {} loaded on {}".format(model_type, device))
@@ -195,7 +195,6 @@ if __name__ == '__main__':
     fcs = [int(item) for item in args.fcs.split(',')]
     batch_norm = args.batch_norm
     alpha = args.alpha
-    
 
     if args.device in ['cuda', 'cpu']:
         device = args.device
@@ -204,8 +203,7 @@ if __name__ == '__main__':
 
     print("Device:", device)
 
-    
-    glove, field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length, args.glove)
+    field, tokenizer, train_data, val_data, test_data = get_datasets(training_data, testset_data, test_labels_data, model_type, fix_length)
 
     dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
@@ -213,4 +211,4 @@ if __name__ == '__main__':
          batch_size, epochs, patience_es, do_save, device, do_print=True, save_condition=save_condition, 
          scheduler_type=scheduler_type, patience_lr=patience_lr, fix_length=fix_length, 
          context_size=context_size, pyramid=pyramid, fcs=fcs,
-         batch_norm=batch_norm, alpha=alpha, pad_len=args.pad_len, pooling_size=args.pooling_size, glove = glove)
+         batch_norm=batch_norm, alpha=alpha)

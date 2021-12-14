@@ -15,16 +15,15 @@ from sklearn.metrics import confusion_matrix
  
 from src.models import BasicLSTM, BiLSTM, Transformers, Hybrid_CNN_LSTM, Hybrid_LSTM_CNN, AutoTransformer, PyramidCNN
 
-SAVED_MODELS_PATH = "saved_models/"
+SAVED_MODELS_PATH = "saved-models/"
 FIGURES_PATH = "figures/"
-GRIDSEARCH_CSV = "gridsearch_results/"
-STATS_CSV = "stats_results/"
+GRIDSEARCH_CSV = "gridsearch-results/"
+STATS_CSV = "stats-results/"
 
 def load_model(model_type, field, device, 
                context_size=0, pyramid=[256, 256], 
-               fcs=[128], batch_norm=0, alpha=0.2,
-               pad_len=30, pooling_size=2,
-               fix_length=None, glove=None):
+               fcs=[128], batch_norm=0, alpha=0.2, 
+               fix_length=None):
     """
     Load and return model.
     """
@@ -49,8 +48,7 @@ def load_model(model_type, field, device,
 
     elif model_type == 'PyramidCNN':
         model = PyramidCNN.PyramidCNN(num_words=field.vocab.__len__(),context_size=context_size, 
-                                      pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha, 
-                                      pad_len=pad_len, pooling_size=pooling_size, glove=glove)
+                                      pyramid=pyramid, fcs=fcs, batch_norm=batch_norm, alpha=alpha)
 
     elif model_type == 'HybridCNNLSTM':
 	      model = Hybrid_CNN_LSTM.HybridCNNLSTM()
@@ -149,4 +147,3 @@ def plot_cm(hist, model_type, do_save, do_plot=False, do_print=False):
         if do_print: print(f"Confusion Matrix saved at {cm_path}")
     if do_plot: plt.show()
 
-# From https://github.com/Bjarten/early-stopping-pytorch

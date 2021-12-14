@@ -56,6 +56,8 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                     'pooling_size': [],
                     'best_epoch': [], 
                     'train_loss': [], 
+                    'val_loss': [], 
+                    'train_acc': [], 
                     'val_acc': [], 
                     'test_acc': [], 
                     'end_time': []}
@@ -69,6 +71,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         loss_criterion, lr, epochs, \
         batch_size, patience_es, \
         scheduler_type, patience_lr, \
+
         save_condition, fix_length, context_size, pyramid, fcs, batch_norm, alpha, pad_length, pooling_size = params
 
         pretrained_glove = False
@@ -80,15 +83,21 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
             print("prev_model_type", prev_model_type)
             print("model_type", model_type)
             print("Changing tokenizer...")
-            glove, ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, 
+            ENGLISH, tokenizer, train_data, val_data, test_data = get_datasets(training_data, 
                                                                                testset_data, test_labels_data, 
                                                                                model_type, fix_length,'', pretrained_glove)
+
             prev_model_type = model_type
 
         print('fix_length:', fix_length)
         print('batch_size:', batch_size)
-       
-
+        
+        if model_type == 'PyramidCNN':
+            print('context_size:', context_size)
+            print('pyramid:', pyramid)
+            print('fcs:', fcs)
+            print('batch_norm:', batch_norm)
+            print('alpha:', alpha)
         dataloaders = get_dataloaders(train_data, val_data, test_data, batch_size, device)
 
         history_training = main(dataloaders, ENGLISH, model_type, optimizer_type, 
@@ -98,7 +107,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
                                scheduler_type=scheduler_type, patience_lr=patience_lr, 
                                save_condition=save_condition, fix_length=fix_length, 
                                context_size=context_size, pyramid=pyramid, fcs=fcs,
-                               batch_norm=batch_norm, alpha=alpha, pad_len=pad_length, pooling_size= pooling_size, glove=glove)
+                               batch_norm=batch_norm, alpha=alpha)
 
         # Save training results to csv
         best_epoch = history_training['best_epoch']
@@ -120,6 +129,7 @@ def gridsearch(config_path, training_data, testset_data, test_labels_data, do_sa
         results_dict['alpha'].append(alpha)
         results_dict['context_size'].append(context_size)
         results_dict['pooling_size'].append(pooling_size)
+        
         results_csv = pd.DataFrame(data=results_dict)
         results_csv.to_csv(csv_path)
 

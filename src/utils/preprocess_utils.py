@@ -6,7 +6,6 @@ import torch
 from torchtext.legacy.data import Field, LabelField, TabularDataset, BucketIterator
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import Dataset
-import tqdm
 
 import nltk
 nltk.download('stopwords')
@@ -22,6 +21,7 @@ import transformers
 def format_training_file(text_file, module_path=''):
     tweets = []
     classes = []
+
     for line in open(module_path+text_file,'r',encoding='utf-8'):
         line = re.sub(r'#([^ ]*)', r'\1', line)
         line = re.sub(r'https.*[^ ]', 'URL', line)
@@ -35,7 +35,8 @@ def format_training_file(text_file, module_path=''):
 
     return tweets[1:], classes[1:]
 
-def train_val_split_tocsv(tweets, classes, val_size=0.1, module_path=''):
+
+def train_val_split_tocsv(tweets, classes, val_size=0.2, module_path=''):
     tweets_train, tweets_val, y_train, y_val = train_test_split(tweets, classes, test_size=val_size, random_state=42)
 
     df_train = pd.DataFrame({'text': tweets_train, 'label': y_train})
@@ -64,7 +65,7 @@ def format_test_file(text_file_testset, text_file_labels, module_path=''):
 
 def test_tocsv(tweets_test, y_test, module_path=''):
     df_test = pd.DataFrame({'text': tweets_test, 'label': y_test})
-    df_test.to_csv('data/offenseval_test.csv', index=False)
+    df_test.to_csv(module_path+'data/offenseval_test.csv', index=False)
 
 def create_fields_dataset(model_type, fix_length=None, module_path=''):
     tokenizer = None
@@ -145,22 +146,8 @@ def get_datasets(training_data, testset_data, test_labels_data, model_type, fix_
     field.build_vocab(train_data, max_size=10000, min_freq=2)
     label.build_vocab(train_data)
     print("vocabulary built..")
-    
-    if pretraied_glove == True:
-        glove = torch.randn(field.vocab.__len__(),300)
-        print('loading glove...')
-        with open("data/glove.6B/glove.6B.300d.txt", 'r', encoding="utf-8") as f:
-            for line in tqdm.tqdm(f):
-                l = line[:-1].split(' ')
-                s = l[0]
-                emb = [float(x) for x in l[1:]]
-                idx = field.vocab.__getitem__(s)
-                if idx != 0:
-                    glove[idx] = torch.FloatTensor(emb)
-    else:
-        glove = None
 
-    return (glove, field, tokenizer, train_data, val_data, test_data)
+    return (field, tokenizer, train_data, val_data, test_data)
 
 def get_dataloaders(train_data, val_data, test_data, batch_size, device):
     train_iterator, val_iterator = create_iterators(train_data, val_data, batch_size, device, shuffle=True)

@@ -1,10 +1,11 @@
 hyperparameters:
   # Training
+  
   model_type: ['BasicLSTM']
   optimizer_type: ['adam']
   loss_criterion: ['bcelosswithlogits']
   lr: [0.01]
-  epochs: [2]
+  epochs: [10]
   batch_size: [128]
   patience_es: [5]
 
@@ -19,10 +20,11 @@ hyperparameters:
   fix_length: [null]
 
   # PyramidCNN
-  context_size: [3]
-  pyramid: [[128,256,512]]
+  context_size: [0]
+  pyramid: [[256,256]]
   fcs: [[128]]
   batch_norm: [0]
   alpha: [0.5]
   pad_len: [60]
   pooling_size: [2]
+
